@@ -1,0 +1,17 @@
+# Keep secrets and junk out of the image (Render copies build-context
+# secret files into the image root otherwise — see Render Docker docs).
+.git
+.env
+.env.*
+*.log
+error_log
+queue.log
+*.zip
+node_modules
+vendor
+storage/logs
+storage/framework
+storage/app
+public/local-files
+composer.phar
+*.md

@@ -1,15 +1,20 @@
-services:
-  # Web — serves the admin panel, customer PWA, and Android API
-  - type: web
-    runtime: php
-    name: fixcycle-web
-    buildCommand: >
-      composer install --no-dev --prefer-dist --optimize-autoloader
-      && php artisan migrate --force
-      && npm ci && npm run build
-    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
-    healthCheckPath: /health
+# Render Blueprint — Fixcycle (web + queue worker)
+#
+# DEVIATION from OPENCODE_MEGA_PROMPT.md §3.2 (noted per Rule 7):
+# Render has no native PHP runtime. The blueprint schema runtime enum is
+# [docker, elixir, go, image, node, python, ruby, rust, static] — `runtime: php`
+# is invalid and `envVarsFrom` does not exist. Both services therefore build
+# the Dockerfile in this repo, and shared config lives in an envVarGroup.
+#
+# TODO(Phase 3): add a Node build stage to the Dockerfile (Vite) and commit
+# package-lock.json — `npm run build` does not exist yet (package.json is
+# still laravel-mix 2), so asset building is deliberately NOT wired in here.
+
+envVarGroups:
+  - name: fixcycle-config
     envVars:
+      - key: APP_NAME
+        value: Fixcycle
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
@@ -17,35 +22,61 @@ services:
       - key: APP_KEY
         generateValue: true
       - key: APP_URL
-        sync: false
-      - key: DB_CONNECTION
-        value: pgsql
-      - key: DB_SSLMODE
-        value: require
+        sync: false # set to the onrender.com URL at first Blueprint sync
+      - key: LOG_CHANNEL
+        value: daily
+      - key: QUEUE_CONNECTION
+        value: database
+      # config/queue.php reads QUEUE_DRIVER (legacy key) — keep both in sync
+      - key: QUEUE_DRIVER
+        value: database
+      - key: CACHE_DRIVER
+        value: file
       - key: SESSION_DRIVER
         value: file
       - key: SESSION_SECURE_COOKIE
         value: "true"
-      # config/queue.php reads QUEUE_DRIVER; Laravel also honors QUEUE_CONNECTION
-      - key: QUEUE_DRIVER
-        value: database
-      - key: QUEUE_CONNECTION
-        value: database
-      - key: CACHE_DRIVER
-        value: file
-      - key: LOG_CHANNEL
-        value: daily
+      # PostgreSQL on Neon.tech — sslmode=require is mandatory
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_SSLMODE
+        value: require
+      - key: DB_HOST
+        sync: false # Neon host, e.g. ep-xxxx.aws-neon.tech
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # Android-facing socket microservice (PWA uses polling instead)
+      - key: MICRO_SERVICE_APP_URL
+        value: /
+      - key: MICRO_SERVICE_APP_FULL_URL
+        sync: false
+
+services:
+  - type: web
+    name: fixcycle-web
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    preDeployCommand: php artisan migrate --force
+    envVars:
+      - fromGroup: fixcycle-config
     disk:
       name: fixcycle-storage
       mountPath: /var/www/html/storage
       sizeGB: 5
 
-  # Worker — MANDATORY: database queues (payments, notifications) stall without it
+  # MANDATORY: database queues (payments, notifications) stall without it.
+  # dockerCommand overrides the Dockerfile CMD; the entrypoint still runs first.
   - type: worker
-    runtime: php
     name: fixcycle-worker
-    buildCommand: composer install --no-dev --prefer-dist --optimize-autoloader
-    startCommand: php artisan queue:work --tries=3 --sleep=3
-    envVarsFrom:
-      - type: synced
-        targetService: fixcycle-web
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerCommand: php artisan queue:work --tries=3 --sleep=3
+    envVars:
+      - fromGroup: fixcycle-config
