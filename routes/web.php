@@ -20,13 +20,8 @@ Route::post('save-card-token', ['uses' => 'StripeConnect\StripeController@saveCa
 Route::get('driver/locaion', ['as' => 'driverTrack', 'uses' => 'Merchant\DriverController@driver_location']);
 Route::get('share/ride/{type}/{locale}/{code}', ['as' => 'ride.share', 'uses' => 'Merchant\RideShareController@index']);
 Route::get('return-dpo', 'Merchant\DashBoardController@returndpo');
-Route::get('migrateData', 'ImportController@test');
 Route::get('redirectPeach', 'PaymentMethods\RandomPaymentController@redirectPeach')->name('redirectPeach');
 
-Route::get('/send-test-invoice','Merchant\emailTemplateController@SendTestOtpInvoice');
-Route::get('user-otp','Merchant\emailTemplateController@dummy');  //check dummy url
-Route::get('subscription','CronJob\PerMinuteCronController@dummy');  //check dummy url
-Route::get('Subscribe_product_place','CronJob\PerMinuteCronController@Subscribe_product_place');  //check dummy url
 
 /*Cron Job start */
 Route::get('/per-minute-functionalities', 'CronJob\CronController@perMinuteCron');
@@ -53,23 +48,11 @@ Route::get('paymentcomplate', function () {
     return 'done';
 })->name("paymentcomplate");
 
-/* Clear cache of laravel manually*/
-Route::get('/clear-cache', function () {
-    Artisan::call('cache:clear');
-    Artisan::call('route:clear');
-    Artisan::call('view:clear');
-    return "Cache is cleared";
-});
+/* Maintenance (cache/queue control) is done via artisan — see README "Maintenance" */
 
-Route::get('/queue-start', function () {
-    Artisan::call('queue:listen');
-    return "Queue started";
-});
-
-Route::get('/queue-restart', function () {
-    Artisan::call('queue:restart');
-    return "Queue now restarted";
-});
+Route::get('/health', function () {
+    return response('OK', 200);
+})->name('health');
 
 Route::get('/', function () {
     return view('welcome');
@@ -134,11 +117,8 @@ Route::prefix('merchant/admin')->group(function () {
 
     Route::group(['middleware' => ['auth:merchant', 'isactiveuser', 'admin_language']], function () {
 
-        Route::get('toll-test', ['as' =>'merchant.test-toll','uses' =>  'Merchant\DashBoardController@testToll']);
-        Route::get('/get-merchant-key', ['as' => 'merchant.get-key', 'uses' => 'DashBoardController@getKeys']);
         // logs of system
 //        Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
-        Route::get('/test-referral', 'Helper\ReferralController@testReferralSystem');
 
         // reward points routes
         Route::post('reward-system/store', 'Merchant\RewardController@SaveRewardSystem')->name('merchant.rewardSystem.store');
@@ -1074,8 +1054,8 @@ Route::prefix('merchant/admin')->group(function () {
         Route::post('/home-screen/design-config', ['as' => 'merchant.home-screen.design-config.save', 'uses' => 'Merchant\HomeScreenDesignConfigController@save']);
 
         /* Product order*/
-        Route::get('/order', ['as' => 'order.index', 'uses' => 'BusinessSegment\OrderController@index']);
-        Route::get('/order/search', ['as' => 'order.search', 'uses' => 'BusinessSegment\OrderController@index']);
+        Route::get('/order', ['as' => 'order.index', 'uses' => function () { abort(404); }]);
+        Route::get('/order/search', ['as' => 'order.search', 'uses' => function () { abort(404); }]);
         Route::get('/excel/order', ['as' => 'excel.order', 'uses' => 'ExcelController@PriceCard']);
 
         /*Segment update*/
@@ -1267,7 +1247,7 @@ Route::prefix('merchant/admin')->group(function () {
         Route::get('/taxi-services/reports', ['as' => 'merchant.taxi-services-report', 'uses' => 'Merchant\BookingController@taxiServicesEarning']);
         Route::get('/taxi-earning/export', ['as' => 'merchant.taxi.earning.export', 'uses' => 'ExcelController@taxiServicesEarningExport']);
         Route::get('/handyman-services/reports', ['as' => 'merchant.handyman-services-report', 'uses' => 'Merchant\HandymanOrderController@handymanServicesEarning']);
-        Route::get('/delivery-services/reports', ['as' => 'merchant.delivery-services-report', 'uses' => 'BusinessSegment\OrderController@orderEarningSummary']);
+        Route::get('/delivery-services/reports', ['as' => 'merchant.delivery-services-report', 'uses' => function () { abort(404); }]);
         Route::get('/delivery-services/export', ['as' => 'merchant.delivery-services-report.export', 'uses' => 'ExcelController@orderEarningSummary']);
         Route::get('/handyman-earning/export', ['as' => 'merchant.handyman-service.earning.export', 'uses' => 'ExcelController@handymanServicesEarningExport']);
         Route::get('/report/referral', ['as' => 'report.referral', 'uses' => 'Merchant\ReferralSystemController@referralReport']);

@@ -333,7 +333,7 @@ class S3PPayController extends Controller
 
 
         $response = json_decode($response->getBody(), true);
-        \Log::channel('s3p_pay')->emergency(['payment_verify' => $response,,'trans_id'=>$trid]);
+        \Log::channel('s3p_pay')->emergency(['payment_verify' => $response,'trans_id'=>$trid]);
         $data = [];
         if (!empty($response)) {
             if ($response[0]['status'] == 'SUCCESS') {

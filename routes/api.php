@@ -9,9 +9,6 @@ header('Access-Control-Allow-Headers: *');
 //header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Credentials, Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Allow-Headers, aliasName, publicKey, secretKey, locale');
 
 
-Route::get('test', function (Request $request) {
-    dd($request->all());
-});
 //sms testing route
 Route::post('/MessageMedia', 'SmsGateways\SimpleSms@MessageMedia');
 //stripe callback
@@ -74,9 +71,6 @@ Route::any('/yas/callback', 'PaymentMethods\Yas\YasController@YasCallBack')->nam
 
 //Buttler Routes
 Route::any('user/mpessapayment_confirmation', 'PaymentMethods\RandomPaymentController@MpessaCallBack');
-Route::post('/{alias_name}/api/trips', 'Api\ButtlerController@index');
-Route::get('/{alias_name}/api/trips/{tripId}', 'Api\ButtlerController@tripstatus');
-Route::delete('/{alias_name}/api/trips/{tripId}', 'Api\ButtlerController@trips_delete');
 
 Route::get('callbackkorba', 'PaymentMethods\RandomPaymentController@callbackkorba');
 Route::any('/bancardCallback', 'PaymentMethods\RandomPaymentController@bancardCallback')->name('bancardCallback');
@@ -87,11 +81,9 @@ Route::post('/beyonicCallback', 'PaymentMethods\BeyonicPayment\BeyonicController
 //common api's for all apps
 //Route::post('/checkBookingStatus', 'Api\BookingController@CheckBookingStatus');
 Route::post('/check-booking-status', 'Api\BookingController@checkBookingStatus');
-Route::post('send-mail', 'Api\EmailController@test');
 Route::post('/estimate', 'Helper\ExtraCharges@NewnightchargeEstimate');
 Route::get('/copypaste', 'Api\UserController@CopySignUp');
 Route::post('/bookingStatus', 'Api\BookingController@BookingStatus');
-Route::post('/conekta', 'Api\FoodController@conekta');
 Route::get('/time', function () {
     return response()->json(['result' => '1', 'message' => 'Time Stamp', 'time' => time()]);
 });
@@ -886,7 +878,6 @@ Route::prefix('user')->group(function () {
 
         Route::post('/guest/login', ['as' => 'api.user.guest.login', 'uses' => 'Account\UserController@guestLogin']);
         Route::post("/in-app-call", ['as' => 'api.user.in_app_call', 'uses' => 'Api\CommonController@inAppCalling']);
-        Route::post('/handyman-store-list', ['as' => 'api.user.handyman.store-list', 'uses' => 'HandymanStore\Api\StoreApiController@storeList']);
 
         //chat platform booking
         Route::post("/chat/car-types", ['as' => 'api.user.chat.car.types', 'uses' => 'Api\ChatPlatformController@Cars']);
@@ -927,11 +918,6 @@ Route::prefix('user')->group(function () {
         //        Route::post('/delivery/checkout', 'Delivery\ApiController@Checkout');
 
         //Delivery Routes
-        Route::post('/delivery/checkout', 'Api\DeliveryController@Checkout');
-        Route::post('/delivery/checkout-details', 'Api\DeliveryController@CheckoutDetails');
-        Route::post('/delivery/checkout/store-drop-details', 'Api\DeliveryController@storeCheckoutDetails');
-        Route::post('/delivery/checkout/vehicle-delivery-package', 'Api\DeliveryController@getVehicleFromDeliveryPackage');
-        Route::post('/confirm/delivery', ['as' => 'api.booking-confirm-delivery', 'uses' => 'Api\DeliveryController@Confirm']);
 
 
         Route::post('/increaseRideRequestArea', ['as' => 'api.increaseRideRequestArea', 'uses' => 'Api\BookingController@getNextRadiusDriver']);
@@ -1100,15 +1086,12 @@ Route::prefix('user')->group(function () {
         Route::post('/pesapal/transaction', 'PaymentMethods\RandomPaymentController@PesapalTransaction');
 
         // Delivery Routes
-        Route::post('/delivery/product-list', 'Api\DeliveryController@getDeliveryProduct');
-        Route::post('/delivery/category-type', 'Api\DeliveryController@getDeliveryProductCategoryType');
         Route::post('/manage-tip', 'Api\CommonController@addTip');
 
         Route::post('/dpo-paygate-initiate', 'PaymentMethods\RandomPaymentController@dpoPaygateInitiate');
 
         Route::post('amole/otp/generate', ['as' => 'api.user.amole.otp.generate', 'uses' => 'PaymentMethods\EwalletController@amoleGeneratePaymentOtp']);
 
-        Route::post('/search-store-products', ['as' => 'api.search-store-product', 'uses' => 'Api\FoodController@searchStoreProducts']);
 
 
         Route::prefix('handyman')->group(function () {
@@ -1233,8 +1216,6 @@ Route::any('/yas/createtoken', 'PaymentMethods\Yas\YasController@createtoken')->
 
 
         // mark/remove favourite business-segment
-        Route::post('/favourite-business-segment', ['as' => 'api.favourite-business-segment', 'uses' => 'Api\FoodController@favouriteBusinessSegment']);
-        Route::post('/get-favourite-business-segment', ['as' => 'api.favourite.business-segment', 'uses' => 'Api\FoodController@getFavouriteBusinessSegment']);
 
         Route::post('/webxpay/make-payment/{check_for}', 'PaymentMethods\Webxpay\Webxpay@makePayment');
 
@@ -1323,8 +1304,6 @@ Route::any('/yas/createtoken', 'PaymentMethods\Yas\YasController@createtoken')->
         /**
          * Get Job Vacancies on  user app screen
          */
-        Route::post('/job-vacancies', 'Api\JobVacancyController@jobVacanies');
-        Route::post('/apply-job', 'Api\JobVacancyController@applyJob');
         // ViuPay
         Route::group(["prefix" => "viu-pay"], function () {
             Route::post('/get-payment-methods', ['as' => 'api.viu.get-payment-methods', 'uses' => 'PaymentMethods\ViuPay\ViuPayController@getPaymentMethods']);
@@ -1486,7 +1465,6 @@ Route::prefix('driver')->group(function () {
         Route::post('/booking-notification-api', 'Api\CommonController@BookingNotificationApi');
         Route::post('/vehicle-details/dvla', 'Api\DriverController@DvlaVehivehicleDetails');
         //Latra Integeration for verify vehicle license
-        Route::post('/verify-vehicle-license', 'Api\LatraController@verifyVehicleLicense');
 
         Route::post('/validate-data', 'Api\DriverController@SignupValidation');
         // Driver Registration step one
@@ -1870,7 +1848,6 @@ Route::prefix('driver')->group(function () {
         Route::post('development/verification', ['as' => 'api.driver.develop.mode.verification', 'uses' => 'Api\DriverController@developModeVerification']);
 
         // uploaded item loaded images in delivery
-        Route::post('upload-loaded-item-image', ['as' => 'api.driver.delivery-loaded-images', 'uses' => 'Api\DeliveryController@saveProductLoadedImages']);
 
         // check driver document expired/ will expire
         Route::post('check-expired-document', ['as' => 'api.driver.expired-document', 'uses' => 'Api\DriverController@checkDocumentStatus']);
@@ -2121,18 +2098,8 @@ Route::any('/yas/createtoken', 'PaymentMethods\Yas\YasController@createtoken')->
          * Bus Booking Module
          */
         Route::group(["prefix" => "bus-booking"], function () {
-            Route::post('/home-screen', ['as' => 'api.driver.bus-booking.home.screen', 'uses' => 'Api\BusBooking\DriverBusBookingController@homeScreen']);
 
-            Route::post('/get-bookings', ['as' => 'api.driver.get-bookings', 'uses' => 'Api\BusBooking\DriverBusBookingController@getBookings']);
-            Route::post('/get-booking', ['as' => 'api.driver.get-booking', 'uses' => 'Api\BusBooking\DriverBusBookingController@getBooking']);
-            Route::post('/get-booking-stop-detail', ['as' => 'api.driver.get-booking-stop-details', 'uses' => 'Api\BusBooking\DriverBusBookingController@getBookingStopDetail']);
 
-            Route::post('/start-booking', ['as' => 'api.driver.start-booking', 'uses' => 'Api\BusBooking\DriverBusBookingController@startBooking']);
-            Route::post('/pickup-drop', ['as' => 'api.driver.pick-in-out-booking', 'uses' => 'Api\BusBooking\DriverBusBookingController@pickupDrop']);
-            Route::post('/get-passenger-booking', ['as' => 'api.driver.get-passenger-booking', 'uses' => 'Api\BusBooking\DriverBusBookingController@getPassengerBooking']);
-            Route::post('/end-booking', ['as' => 'api.driver.end-booking', 'uses' => 'Api\BusBooking\DriverBusBookingController@endBooking']);
-            Route::post('/bus-stop-status-update', ['as' => 'api.driver.bus-stop-status-update', 'uses' => 'Api\BusBooking\DriverBusBookingController@busStopStatusUpdate']);
-            Route::post('/master-bookings', ['as' => 'api.driver.master.bookings', 'uses' => 'Api\BusBooking\DriverBusBookingController@masterBookings']);
         });
 
         Route::post('/moov-money/send-verify-otp', 'PaymentMethods\MoovMoney\MoovMoneyController@SendMoovMoneyOTP');
@@ -2158,8 +2125,6 @@ Route::any('/yas/createtoken', 'PaymentMethods\Yas\YasController@createtoken')->
 
         //laundry module
         Route::prefix('laundry-outlet')->group(function () {
-            Route::post('/order-otp-verification', ['as' => 'laundry-outlet.pickup-otp-verification', 'uses' => 'LaundryOutlet\Api\DriverController@orderPickupVerify']);
-            Route::post('/deliver-order', ['as' => 'laundry-outlet.deliver.order', 'uses' => 'LaundryOutlet\Api\DriverController@deliverOrder']);
         });
     });
 });
@@ -2167,77 +2132,25 @@ Route::any('/yas/createtoken', 'PaymentMethods\Yas\YasController@createtoken')->
 // business segments (restaurant's) api
 Route::prefix('business-segment')->group(function () {
     Route::group(['middleware' => ['business_segment']], function () {
-        Route::get('/fastlane-configuration', ['as' => 'api.business-segment.configuration', 'uses' => 'BusinessSegment\Api\AccountController@FastLaneConfiguration']);
         Route::post('/cms/pages', ['as' => 'api.business-segment-cmspages', 'uses' => 'Api\CommonController@StoreCmsPage']);
         Route::post('/store/getString', ['as' => 'api.business-segment-getString', 'uses' => 'Api\CommonController@getStringForStore']);
-        Route::post('/login-details', ['as' => 'api.business-segment-loginDetails', 'uses' => 'BusinessSegment\Api\AccountController@getLoginDetails']);
-        Route::post('/configuration', ['as' => 'api.business-segment-configuration', 'uses' => 'BusinessSegment\Api\AccountController@configuration']);
-        Route::post('/get-stripe-connect-required-details', ['as' => 'api.business-segment.strip-connect', 'uses' => 'BusinessSegment\Api\AccountController@getStripeConnectRequireDetails']);
-        Route::post('/get-stripe-connect-require-document', ['as' => 'api.business-segment.strip-connect.document', 'uses' => 'BusinessSegment\Api\AccountController@StripeConnectRequiredDocument']);
-        Route::post('/upload-stripe-connect-document', ['as' => 'api.business-segment.strip-connect.document.upload', 'uses' => 'BusinessSegment\Api\AccountController@StripeConnectUploadDocument']);
-        Route::post('/register-stripe-connect', ['as' => 'api.business-segment.strip-connect', 'uses' => 'BusinessSegment\Api\AccountController@RegisterToStripeConnect']);
         // business segment login
-        Route::post('/signup', ['as' => 'api.business-segment-signup', 'uses' => 'BusinessSegment\Api\AccountController@Signup']);
-        Route::post('/on-board', ['as' => 'api.business-segment-login', 'uses' => 'BusinessSegment\Api\AccountController@login']);
-        Route::post('/reset-password', ['as' => 'api.business-segment.reset-password', 'uses' => 'BusinessSegment\Api\AccountController@resetPassword']);
-        Route::post('/forgot-password', ['as' => 'api.business-segment.password', 'uses' => 'BusinessSegment\Api\AccountController@ForgotPassword']);
 
         
         // Route::post('/check-stripe-connect', 'Account\DriverController@CheckStripeConnect');
     });
 
     Route::group(['middleware' => ['auth:business-segment-api', 'valid_business_segment']], function () {
-        Route::post('/out-board', ['as' => 'bs.business-segment-logout', 'uses' => 'BusinessSegment\Api\AccountController@logout']);
 
         //Delete Store Account
-        Route::post('/delete-account', ['as' => 'bs.business-segment-delete-account', 'uses' => 'BusinessSegment\Api\AccountController@DeleteAccount']);
 
-        Route::post('/edit-profile', ['as' => 'bs.business-segment-profile', 'uses' => 'BusinessSegment\Api\AccountController@editProfile']);
-        Route::post('/get-orders', ['as' => 'bs.all-orders', 'uses' => 'BusinessSegment\Api\OrderController@getOrders']);
-        Route::post('/get-order-details', ['as' => 'bs.order-details', 'uses' => 'BusinessSegment\Api\OrderController@getOrderDetails']);
-        Route::post('/get-products', ['as' => 'bs.all-products', 'uses' => 'BusinessSegment\Api\OrderController@getProducts']);
-        Route::post('/get-product-details', ['as' => 'bs.product-details', 'uses' => 'BusinessSegment\Api\OrderController@getProductDetails']);
 
-        Route::post('/get-product-step1', ['as' => 'bs.get-product-step1', 'uses' => 'BusinessSegment\Api\OrderController@productBasicStep']);
-        Route::post('/save-product-step1', ['as' => 'bs.add-product', 'uses' => 'BusinessSegment\Api\OrderController@saveProductBasicStep']);
 
-        Route::post('/get-product-step2', ['as' => 'bs.get-product-step2', 'uses' => 'BusinessSegment\Api\OrderController@productVariantStep']);
-        Route::post('/save-product-step2', ['as' => 'bs.add-product-step2', 'uses' => 'BusinessSegment\Api\OrderController@saveProductVariantStep']);
 
-        Route::post('/get-product-step3', ['as' => 'bs.get-product-step3', 'uses' => 'BusinessSegment\Api\OrderController@productInventoryStep']);
-        Route::post('/save-product-step3', ['as' => 'bs.add-product-step3', 'uses' => 'BusinessSegment\Api\OrderController@saveProductInventoryStep']);
 
-        Route::post('/get-sub-categories', ['as' => 'bs.categories', 'uses' => 'BusinessSegment\Api\OrderController@getSubCategories']);
 
-        Route::post('/get-drivers', ['as' => 'bs.choose-delivery-boy', 'uses' => 'BusinessSegment\Api\OrderController@getDrivers']);
-        Route::post('/send-request-to-drivers', ['as' => 'bs.send-order-request', 'uses' => 'BusinessSegment\Api\OrderController@sendOrderRequestToDriver']);
-        Route::post('/cancel-order', ['as' => 'bs.cancel-order', 'uses' => 'BusinessSegment\Api\OrderController@cancelOrder']);
-        Route::post('/reject-order', ['as' => 'bs.reject-order', 'uses' => 'BusinessSegment\Api\OrderController@rejectOrder']);
-        Route::post('/pickup-order-otp-verification', ['as' => 'bs.pickup-otp-verification', 'uses' => 'BusinessSegment\Api\OrderController@orderPickupOTPVerification']);
-        Route::post('/process-order', ['as' => 'bs.process-order', 'uses' => 'BusinessSegment\Api\OrderController@processOrder']);
-        Route::post('/cancel-reasons', ['as' => 'bs.cancel.reason', 'uses' => 'BusinessSegment\Api\OrderController@orderCancelReason']);
-        Route::post('/auto-assign-driver', ['as' => 'bs.auto-order-assign', 'uses' => 'BusinessSegment\Api\OrderController@autoAssignDriver']);
-        Route::post('/manual-assign-driver', ['as' => 'bs.manual-order-assign', 'uses' => 'BusinessSegment\Api\OrderController@manualAssignDriver']);
-        Route::post('/update-product-status', ['as' => 'bs-update-product-status', 'uses' => 'BusinessSegment\Api\OrderController@updateProductStatus']);
-        Route::post('/get-styles', ['as' => 'bs-get-styles', 'uses' => 'BusinessSegment\Api\AccountController@getStyle']);
-        Route::post('/save-styles', ['as' => 'bs-save-styles', 'uses' => 'BusinessSegment\Api\AccountController@saveStyle']);
-        Route::post('/get-options-types', ['as' => 'bs.get-options-types', 'uses' => 'BusinessSegment\Api\OptionController@getOptionTypes']);
-        Route::post('/add-option', ['as' => 'bs.add-option', 'uses' => 'BusinessSegment\Api\OptionController@addOption']);
-        Route::post('/get-options', ['as' => 'bs.get-options', 'uses' => 'BusinessSegment\Api\OptionController@getOptions']);
-        Route::post('/delete-option', ['as' => 'bs.delete-option', 'uses' => 'BusinessSegment\Api\OptionController@deleteOption']);
-        Route::post('/get-wallet-transactions', ['as' => 'bs.get-wallet-transactions', 'uses' => 'BusinessSegment\Api\WalletTransactionController@getTransactions']);
-        Route::post('/get-cashout-transactions', ['as' => 'bs.get-cashout-transactions', 'uses' => 'BusinessSegment\Api\WalletTransactionController@getCashoutTransactions']);
-        Route::post('/request-cashout', ['as' => 'bs.request-cashout', 'uses' => 'BusinessSegment\Api\WalletTransactionController@requestCashout']);
-        Route::post('/get-order-statistics', ['as' => 'bs.get-order-statistics', 'uses' => 'BusinessSegment\Api\OrderController@getOrderStatistics']);
-        Route::post('/get-earnings', ['as' => 'bs.get-earnings', 'uses' => 'BusinessSegment\Api\OrderController@getEarnings']);
-        Route::post('/get-configurations', ['as' => 'bs-get-configurations', 'uses' => 'BusinessSegment\Api\AccountController@getConfigurations']);
-        Route::post('/save-options', ['as' => 'bs.save-options', 'uses' => 'BusinessSegment\Api\OrderController@optionStepSave']);
-        Route::post('/get-product-options', ['as' => 'bs.get-product-options', 'uses' => 'BusinessSegment\Api\OrderController@getProductOptions']);
-        Route::post('/get-merchant-details', ['as' => 'api.business-segment-merchant', 'uses' => 'BusinessSegment\Api\AccountController@getMerchantDetails']);
 
         //self pickup modification
-        Route::post('/accept-order', ['as' => 'bs.accept-order', 'uses' => 'BusinessSegment\Api\OrderController@acceptOrder']);
-        Route::post('/deliver-order', ['as' => 'bs.deliver-order', 'uses' => 'BusinessSegment\Api\OrderController@deliverOrder']);
         //send chat message to user
         Route::post('/chat/send_message_to_user', ['as' => 'bs.chat.send_message_to_user', 'uses' => 'Api\ChatController@StoreSendMessageToUser']);
         //chat history api between store and user
@@ -2246,16 +2159,9 @@ Route::prefix('business-segment')->group(function () {
         //chat list
         Route::post('/chat/list', ['as' => 'bs.chat.list', 'uses' => 'Api\ChatController@ChatList']);
 
-        Route::post('/cards', 'BusinessSegment\Api\CardController@businessSegmentCards');
-        Route::post('/save-card', 'BusinessSegment\Api\CardController@savebusinessSegmentCard');
-        Route::post('/card/delete', 'BusinessSegment\Api\CardController@businessSegmentDeleteCard');
-        Route::post('/card/make-payment', 'BusinessSegment\Api\CardController@businessSegmentCardPayment');
 
-        Route::post('/wallet/addMoney', ['as' => 'api.driver.addMoney', 'uses' => 'BusinessSegment\Api\WalletTransactionController@AddMoney']);
 
         //merchant plan details
-        Route::post('/membership-plan', ['as' => 'api.plan-details', 'uses' => 'BusinessSegment\Api\MembershipPlanController@getPlanDetails']);
-        Route::post('/purchase-membership-plan', ['as' => 'api.purchase-membership', 'uses' => 'BusinessSegment\Api\MembershipPlanController@purchaseMembership']);
     });
 });
 
@@ -2263,17 +2169,6 @@ Route::post('/webxpay/return-callback', 'PaymentMethods\Webxpay\Webxpay@returnCa
 
 Route::get('/interswitch/web-payment/{transaction_id}', 'PaymentMethods\Interswitch\InterswitchController@webPayment')->name('interswitch-web-payment');
 
-Route::get('/test-merchant-notification', ['as' => 'test.notify.merchant', 'uses' => 'Api\CommonController@testMerchantNotification']);
-
-
-Route::get('/test-email', function () {
-    $controller =  new \App\Http\Controllers\CronJob\PerMinuteCronController();
-    $emailTemplateController =  new \App\Http\Controllers\Merchant\emailTemplateController();
-    $order = \App\Models\BusinessSegment\Order::find(17151);
-    $emailTemplateController->SendNewOrderRequestMail($order);
-    // $controller->handle();
-    dd('test');
-});
 
 
 Route::any('multi-service-status', function (Request $request) {
