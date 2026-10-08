@@ -1,0 +1,59 @@
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Laravel 4 specific
+bootstrap/compiled.php
+app/storage/
+
+# Laravel 5 & Lumen specific
+public/storage
+public/hot
+storage/app/temp/
+# Laravel 5 & Lumen specific with changed public path
+public_html/storage
+public_html/hot
+
+storage/logs
+storage/framework
+.env
+Homestead.yaml
+Homestead.json
+/.vagrant
+.phpunit.result.cache
+.idea/
+
+vendor/
+public/local-files/
+queue.log
+
+# Note: resources/lang/* is intentionally NOT ignored — lang files are used by views at runtime.
+
+# Secrets must never be committed
+/public/pem-file/
+/public/*.pem
+/public/certificates/
+/storage/app/secrets/
+/storage/merchant_keys/
+/storage/oauth-private.key
+/storage/oauth-public.key
+*.pem
+*.key
+
+# Windows download metadata junk
+*Zone.Identifier*
+
+# Deployment & local junk
+error_log
+*.log
+/storage/logs/
+.env.backup
+.env.production
+.DS_Store
+Thumbs.db
+*.zip
+/documents/
+*_DRAFT.md
+*_SUMMARY.md
+*_ANALYSIS.md
+/public/local-files/
