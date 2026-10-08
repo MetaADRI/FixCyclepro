@@ -58,3 +58,8 @@ Thumbs.db
 *_SUMMARY.md
 *_ANALYSIS.md
 /public/local-files/
+
+# Agent / tool working files
+OPENCODE_MEGA_PROMPT.md
+/.freebuff/
+/.kilo/
