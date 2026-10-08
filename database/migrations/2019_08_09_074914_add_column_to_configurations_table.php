@@ -15,7 +15,6 @@ class AddColumnToConfigurationsTable extends Migration
     {
         Schema::table('configurations', function (Blueprint $table) {
             //
-            $table->tinyInteger('driver_address')->nullable();
             $table->integer('reminder_doc_expire')->nullable()->default(1)->comment('In Days');
         });
     }

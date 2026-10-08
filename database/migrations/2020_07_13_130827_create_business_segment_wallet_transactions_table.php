@@ -18,7 +18,7 @@ class CreateBusinessSegmentWalletTransactionsTable extends Migration
             $table->unsignedInteger('merchant_id');
             $table->foreign('merchant_id')->references('id')->on('merchants')->onUpdate('RESTRICT')->onDelete('CASCADE');
             $table->unsignedInteger('business_segment_id');
-            $table->foreign('business_segment_id')->references('id')->on('business_segments')->onUpdate('RESTRICT')->onDelete('CASCADE');
+            $table->foreign('business_segment_id', 'bswt_business_segment_id_foreign')->references('id')->on('business_segments')->onUpdate('RESTRICT')->onDelete('CASCADE');
             $table->unsignedInteger('order_id')->nullable();
             $table->foreign('order_id')->references('id')->on('orders')->onUpdate('RESTRICT')->onDelete('CASCADE');
             $table->text('narration')->comment('transaction details text');

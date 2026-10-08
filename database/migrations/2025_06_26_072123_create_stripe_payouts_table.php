@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('stripe_account');
             $table->string('amount');
             $table->string('currency');
-            $table->foreignId('merchant_id')->constrained('merchants');
+            $table->unsignedInteger('merchant_id');
+            $table->foreign('merchant_id')->references('id')->on('merchants');
             $table->integer('status')->comment('1=> Pending, 2=> Success, 3=> Faild');
             $table->timestamps();
         });

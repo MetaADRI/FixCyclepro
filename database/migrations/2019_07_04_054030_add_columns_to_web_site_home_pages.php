@@ -14,10 +14,6 @@ class AddColumnsToWebSiteHomePages extends Migration
     public function up()
     {
         Schema::table('web_site_home_pages', function (Blueprint $table) {
-            $table->string('user_estimate_image')->nullable();
-            $table->string('featured_component_main_image')->nullable();
-            $table->string('user_login_bg_image')->nullable();
-            $table->string('driver_login_bg_image')->nullable();
         });
     }
 

@@ -15,7 +15,6 @@ class AddLoginBackgroundImageToBusinessSegmentsTable extends Migration
     {
         Schema::table('business_segments', function (Blueprint $table) {
             // column is duplicate
-//            $table->string('login_background_image')->nullable();
         });
     }
 

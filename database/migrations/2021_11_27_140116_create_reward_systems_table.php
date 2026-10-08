@@ -37,11 +37,9 @@ class CreateRewardSystemsTable extends Migration
             $table->integer('no_of_trips')->nullable();
             $table->integer('trips_type')->nullable();
             $table->double('expense_amount',10,2)->nullable();
-            $table->int('point_against_trips')->nullable();
+            $table->integer('point_against_trips')->nullable();
             $table->double('reward_value')->nullable();
-            $table->int('status')->default(2);
-            $table->integer('trips_type')->nullable();
-            $table->integer('trips_type')->nullable();
+            $table->integer('status')->default(2);
             $table->string('expenses_expire_in_days')->nullable();
             $table->tinyInteger('online_time_reward')->nullable();
             $table->integer('points_per_hour')->nullable();

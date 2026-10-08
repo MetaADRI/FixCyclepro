@@ -15,9 +15,6 @@ class AddCallMaskingToConfigurationsTable extends Migration
     {
         Schema::table('configurations', function (Blueprint $table) {
             $table->tinyInteger('twilio_call_masking')->nullable()->default(2)->comment('1 - Enable, 2 - Disable');
-            $table->string('twilio_sid')->nullable();
-            $table->string('twilio_service_id')->nullable();
-            $table->string('twilio_token')->nullable();
         });
     }
 

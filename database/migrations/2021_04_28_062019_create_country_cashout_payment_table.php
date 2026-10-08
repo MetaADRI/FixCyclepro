@@ -18,7 +18,7 @@ class CreateCountryCashoutPaymentTable extends Migration
             $table->integer('country_id')->unsigned()->index('country_carpooling_document_country_id_foreign');
             $table->foreign('country_id')->references('id')->on('countries')->onUpdate('RESTRICT')->onDelete('CASCADE');
             $table->integer('payment_options_configuration_id')->unsigned();
-            $table->foreign('payment_options_configuration_id')->references('id')->on('payment_options_configurations')->onUpdate('RESTRICT')->onDelete('CASCADE');
+            $table->foreign('payment_options_configuration_id', 'country_cashout_payment_poc_id_foreign')->references('id')->on('payment_options_configurations')->onUpdate('RESTRICT')->onDelete('CASCADE');
             
         });
     }

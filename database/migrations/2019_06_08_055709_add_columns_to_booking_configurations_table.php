@@ -32,7 +32,6 @@ class AddColumnsToBookingConfigurationsTable extends Migration
       $table->tinyInteger('manual_dispatch')->default(1)->nullable();
       $table->tinyInteger('multiple_destination_price')->nullable();
       $table->tinyInteger('corporate_price_card')->nullable();
-      $table->tinyInteger('handyman_booking_dispute')->nullable();
     });
   }
 

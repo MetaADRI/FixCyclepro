@@ -16,8 +16,6 @@ class AddColumnsToTransactionsTable extends Migration
         Schema::table('transactions', function (Blueprint $table) {
 //            these columns are already added while created table
 //            $table->string('reference_id')->nullable()->comment('Payment Gateway Reference Id')->change();
-//            $table->string('status_message')->default('Pending');
-//            $table->string('amount')->after('checkout_id')->comment('e.g. INR 50.00');
         });
     }
 

@@ -23,10 +23,6 @@ class AddColumnsToConfigurationsTable extends Migration
             $table->tinyInteger('admin_alert_on_driver_reg')->nullable();
             $table->tinyInteger('handyman_order_start_otp')->default(1)->nullable();
             $table->tinyInteger('bussiness_seg_sub_cat_optional')->nullable();
-            $table->tinyInteger('order_id_verification')->nullable();
-            $table->tinyInteger('new_ride_before_ride_end')->nullable();
-            $table->tinyInteger('referral_autofill')->nullable();
-            $table->tinyInteger('handyman_manual_bidding')->nullable();
         });
     }
 

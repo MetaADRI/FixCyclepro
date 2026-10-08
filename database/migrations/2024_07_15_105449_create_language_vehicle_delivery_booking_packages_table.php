@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('booking_id')->unsigned();
             $table->foreign('booking_id')->references('id')->on('bookings')->onUpdate('RESTRICT')->onDelete('CASCADE');
             $table->integer('booking_delivery_detail_id')->unsigned();
-            $table->foreign('booking_delivery_detail_id')->references('id')->on('booking_delivery_details')->onUpdate('RESTRICT')->onDelete('CASCADE');
+            $table->foreign('booking_delivery_detail_id', 'lvdb_packages_bdd_id_foreign')->references('id')->on('booking_delivery_details')->onUpdate('RESTRICT')->onDelete('CASCADE');
             $table->string('quantity')->nullable();
             $table->timestamps();
         });

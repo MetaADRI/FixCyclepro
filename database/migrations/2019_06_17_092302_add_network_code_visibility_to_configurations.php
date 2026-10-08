@@ -15,7 +15,6 @@ class AddNetworkCodeVisibilityToConfigurations extends Migration
     {
         if(Schema::hasTable('configurations')) {
             Schema::table('configurations', function (Blueprint $table) {
-                $table->string('network_code_visibility')->nullable();
             });
         }
     }

@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('language_vehicle_delivery_packages', function (Blueprint $table) {
             $table->id();
-            $table->integer('vehicle_delivery_package_id')->unsigned();
-            $table->foreign('vehicle_delivery_package_id')->references('id')->on('vehicle_delivery_packages')->onUpdate('RESTRICT')->onDelete('CASCADE');
+            $table->unsignedBigInteger('vehicle_delivery_package_id');
+            $table->foreign('vehicle_delivery_package_id', 'lvd_packages_vdp_id_foreign')->references('id')->on('vehicle_delivery_packages')->onUpdate('RESTRICT')->onDelete('CASCADE');
             $table->string('package_name')->nullable();
             $table->string('locale', 10)->index();
             $table->timestamps();
