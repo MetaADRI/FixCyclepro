@@ -44,6 +44,7 @@ queue.log
 *Zone.Identifier*
 
 # Deployment & local junk
+composer.phar
 error_log
 *.log
 /storage/logs/
