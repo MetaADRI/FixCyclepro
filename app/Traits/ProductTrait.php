@@ -138,7 +138,7 @@ trait ProductTrait
         $products = [];  //products incase when needed a specefic product with product_id
         if ($request->return_type != 'single_product_detail') {
             $products = $query->where([['status', '=', 1]])
-                ->orderBy(DB::raw('RAND()'))
+                ->orderByRaw('random()')
                 ->get();
         }
 

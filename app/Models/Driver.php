@@ -1803,7 +1803,7 @@ class Driver extends Authenticatable
         $query = Driver::select('drivers.id', 'drivers.first_name', 'drivers.last_name', 'drivers.profile_image', 'drivers.cover_image', 'drivers.created_at', 'drivers.email', 'drivers.phoneNumber', 'drivers.driver_additional_data', 'drivers.website_link', 'fd.is_favourite', 'drivers.business_name')
             //            ->addSelect(DB::raw("CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating"), 'dsr.driver_id')
             //            ->leftJoin('booking_rating as dsr', 'drivers.id', '=', 'dsr.driver_id')
-            ->leftJoin(DB::raw('(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM `favourite_drivers` as fd where( segment_id="' . $segment_id . '" or segment_id IS NULL) and fd.user_id = "' . $arr_reqest->user_id . '" GROUP BY fd.driver_id) fd'), 'drivers.id', '=', 'fd.driver_id')
+            ->leftJoin(DB::raw("(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM favourite_drivers as fd where( segment_id='$segment_id' or segment_id IS NULL) and fd.user_id = '{$arr_reqest->user_id}' GROUP BY fd.driver_id) fd"), 'drivers.id', '=', 'fd.driver_id')
             ->with(['ServiceType.ServiceTranslation' => function ($q) use ($merchant_id) {
                 $q->addSelect('service_translations.name', 'service_translations.service_type_id');
                 $q->where('service_translations.merchant_id', $merchant_id);
@@ -1884,7 +1884,7 @@ class Driver extends Authenticatable
         if (!empty($merchant->Configuration->lat_long_storing_at) && $merchant->Configuration->lat_long_storing_at == 2) {
             $query = Driver::select('drivers.id', 'ats_id', 'drivers.first_name', 'drivers.last_name', 'drivers.profile_image', 'drivers.created_at', 'fd.is_favourite', 'drivers.id AS driver_id', 'email', 'phoneNumber', 'drivers.rating')
                 ->join('driver_online as do', 'drivers.id', '=', 'do.driver_id')
-                ->leftJoin(DB::raw('(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM `favourite_drivers` as fd where( segment_id="' . $segment_id . '" or segment_id IS NULL AND user_id="' . $user_id . '" or user_id IS NULL) GROUP BY fd.driver_id) fd'), 'drivers.id', '=', 'fd.driver_id')
+                ->leftJoin(DB::raw("(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM favourite_drivers as fd where( segment_id='$segment_id' or segment_id IS NULL AND user_id='$user_id' or user_id IS NULL) GROUP BY fd.driver_id) fd"), 'drivers.id', '=', 'fd.driver_id')
                 ->whereHas('ServiceType', function ($q) use ($segment_id) {
                     $q->where('driver_service_type.segment_id', $segment_id);
                 })
@@ -2081,7 +2081,7 @@ class Driver extends Authenticatable
                 $query = Driver::select('drivers.id', 'drivers.first_name', 'drivers.last_name', 'drivers.profile_image', 'drivers.created_at', 'drivers.rating', 'drivers.country_area_id')
                     ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
                     ->join('driver_online as do', 'drivers.id', '=', 'do.driver_id')
-                    //                ->leftJoin(DB::raw('(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM `favourite_drivers` as fd where( segment_id="' . $segment_id . '" or segment_id IS NULL AND user_id="' . $user_id . '" or user_id IS NULL) GROUP BY fd.driver_id) fd'), 'drivers.id', '=', 'fd.driver_id')
+                    //                ->leftJoin(DB::raw("(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM favourite_drivers as fd where( segment_id='$segment_id' or segment_id IS NULL AND user_id='$user_id' or user_id IS NULL) GROUP BY fd.driver_id) fd"), 'drivers.id', '=', 'fd.driver_id')
                     ->whereHas('ServiceType', function ($q) use ($segment_id) {
                         $q->where('driver_service_type.segment_id', $segment_id);
                     })

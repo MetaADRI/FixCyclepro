@@ -120,13 +120,13 @@ trait BookingTrait
         if (request()->rider) {
             $keyword = request()->rider;
             $query->WhereHas('User', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
             });
         }
         if (request()->driver) {
             $keyword = request()->driver;
             $query->WhereHas('Driver', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
             });
         }
         $bookings = $query->paginate(25);
@@ -146,13 +146,13 @@ trait BookingTrait
         if (request()->rider) {
             $keyword = request()->rider;
             $query->WhereHas('User', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
             });
         }
         if (request()->driver) {
             $keyword = request()->driver;
             $query->WhereHas('Driver', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
             });
         }
         $later_bookings = $query->paginate(25);
@@ -541,14 +541,14 @@ trait BookingTrait
         if (!empty($request->rider) && $request->rider) {
             $keyword = $request->rider;
             $query->WhereHas('User', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")
                     ->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
             });
         }
         if (!empty($request->driver) && $request->driver) {
             $keyword = $request->driver;
             $query->WhereHas('Driver', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")
                     ->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
             });
         }

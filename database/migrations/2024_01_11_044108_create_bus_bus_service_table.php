@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('bus_id')->unsigned();
             $table->foreign("bus_id")->on("buses")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
 
-            $table->bigInteger('bus_service_id')->unsigned()->index('language_bus_service');
+            $table->bigInteger('bus_service_id')->unsigned()->index('bus_bus_service_language_bus_service');
             $table->foreign("bus_service_id")->on("bus_services")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
         });
     }

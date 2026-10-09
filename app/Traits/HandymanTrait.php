@@ -66,7 +66,7 @@ trait HandymanTrait
             ->with(['ServiceTimeSlotDetail' => function ($q) {
                 $q->addSelect('id', 'to_time', 'from_time');
             }])
-            ->leftJoin(DB::raw('(SELECT dsr.driver_id, CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating FROM `driver_segment_ratings` as dsr GROUP BY dsr.driver_id) dsr'), 'handyman_orders.driver_id', '=', 'dsr.driver_id')
+            ->leftJoin(DB::raw('(SELECT dsr.driver_id, CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating FROM driver_segment_ratings as dsr GROUP BY dsr.driver_id) dsr'), 'handyman_orders.driver_id', '=', 'dsr.driver_id')
             ->where([['merchant_id', '=', $merchant_id]])
             ->whereIn('segment_id', $segment_id)
             ->where(function ($q) use ($driver_id, $request, $driver) {

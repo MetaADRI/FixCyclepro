@@ -76,13 +76,13 @@ class ReportController extends Controller
         if ($request->rider) {
             $keyword = $request->rider;
             $query->WhereHas('User', function ($q) use ($keyword) {
-                $q->whereRaw("CONCAT(`first_name`, `last_name`) LIKE ? ", "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+                $q->whereRaw("CONCAT(first_name, last_name) LIKE ? ", "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
             });
         }
         if ($request->driver) {
             $keyword = $request->driver;
             $query->WhereHas('Driver', function ($q) use ($keyword) {
-                $q->whereRaw("CONCAT(`first_name`, `last_name`) LIKE ? ", "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+                $q->whereRaw("CONCAT(first_name, last_name) LIKE ? ", "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
             });
         }
         if ($request->date) {
@@ -168,7 +168,7 @@ class ReportController extends Controller
         ]);
         switch ($request->parameter) {
             case "1":
-                $parameter = \DB::raw('concat(`first_name`, `last_name`)');
+                $parameter = \DB::raw('concat(first_name, last_name)');
                 break;
             case "2":
                 $parameter = "email";

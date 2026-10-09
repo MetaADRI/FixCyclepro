@@ -18,7 +18,7 @@ class PricingParameterSegmentTable extends Migration
             Schema::create('pricing_parameter_segment', function (Blueprint $table) {
                 $table->integer('pricing_parameter_id')->unsigned();
                 $table->foreign('pricing_parameter_id')->references('id')->on('pricing_parameters')->onUpdate('RESTRICT')->onDelete('CASCADE');
-                $table->integer('segment_id')->unsigned()->index('segment_id_foreign');
+                $table->integer('segment_id')->unsigned()->index('pricing_parameter_segment_segment_id_foreign');
                 $table->foreign('segment_id')->references('id')->on('segments')->onUpdate('RESTRICT')->onDelete('CASCADE');
             });
         }

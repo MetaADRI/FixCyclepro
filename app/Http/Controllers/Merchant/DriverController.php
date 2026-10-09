@@ -3552,7 +3552,7 @@ class DriverController extends Controller
 
             switch ($request->parameter) {
                 case "1":
-                    $parameter = DB::raw('CONCAT_WS(" ", drivers.first_name, drivers.last_name)');
+                    $parameter = DB::raw("CONCAT_WS(' ', drivers.first_name, drivers.last_name)");
                     break;
                 case "2":
                     $parameter = 'drivers.email';

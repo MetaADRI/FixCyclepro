@@ -1,0 +1,351 @@
+# RAW SQL INVENTORY (PostgreSQL migration audit)
+# Generated 2026-10-09. Line numbers refer to the pre-fix source.
+# STATUS: every MySQL-only construct listed below has been PORTED to Postgres.
+# Specifics:
+#   - find_in_set(...)  -> <col> = ANY(string_to_array(<csvcol>, ','))  [6 sites]
+#   - RAND()            -> random()   [2 orderByRaw sites]
+#   - CONCAT_WS(" ",)   -> ' '        [6 sites]
+#   - CONCAT(`a`,`b`)   -> CONCAT(a, b) (backticks removed)   [15 sites]
+#   - backticked table/column names in raw subqueries -> unquoted names [7 sites]
+#   - REGEXP kept (PG alias for ~; semantics preserved via LOWER())
+#   - GROUP_CONCAT / ON DUPLICATE KEY / IFNULL / FIND_IN_SET: none remaining
+# Known-phase-5: 211 change() sites require doctrine/dbal (deprecation noise on PHP 8.1, non-fatal).
+
+app\Http\Controllers\ExcelController.php:765: $parameter = \DB::raw('concat(first_name, last_name)');
+app\Http\Controllers\ExcelController.php:1523: // $parameter = \DB::raw('concat("first_name", "last_name")');
+app\Http\Controllers\ExcelController.php:2701: $q->where(\DB::raw("concat(`first_name`,' ', `last_name`)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\ExcelController.php:2707: $q->where(\DB::raw("concat(`first_name`,' ', `last_name`)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\ExcelController.php:3527: $q->whereRaw("CONCAT(`first_name`, `last_name`) LIKE ? ", "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\ExcelController.php:3533: $q->whereRaw("CONCAT(`first_name`, `last_name`) LIKE ? ", "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\ExcelController.php:3595: $q->whereRaw("CONCAT(`first_name`, `last_name`) LIKE ? ", "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\ExcelController.php:3601: $q->whereRaw("CONCAT(`first_name`, `last_name`) LIKE ? ", "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\Api\BookingHistoryController.php:144: $bookings = Booking::select('id', 'merchant_booking_id', 'booking_status', 'booking_timestamp', 'payment_status', 'booking_closure',  \DB::raw("CONCAT(drivers.first_name, ' ', drivers.last_name) AS driver_name"), 'pickup_location', 'drop_location')
+app\Http\Controllers\Api\BookingHistoryController.php:153: $bookings = Booking::select('id', 'merchant_booking_id', 'booking_status', 'booking_timestamp', 'payment_status', 'booking_closure',  \DB::raw("CONCAT(drivers.first_name, ' ', drivers.last_name) AS driver_name"), 'pickup_location', 'drop_location')
+app\Http\Controllers\Api\BookingHistoryController.php:163: $bookings = Booking::select('bookings.id', 'merchant_booking_id', 'booking_status', 'booking_timestamp', 'payment_status', 'booking_closure', \DB::raw("CONCAT(drivers.first_name, ' ', drivers.last_name) AS driver_name"), 'pickup_location', 'drop_location')
+app\Http\Controllers\Api\CommonController.php:1464: $query->whereRaw(DB::raw("find_in_set($base_area_id,base_areas)"));
+app\Http\Controllers\Api\CommonController.php:1998: $query->whereRaw(DB::raw("find_in_set($base_area_id,base_areas)"));
+app\Http\Controllers\Api\CommonController.php:2171: ->select('brd.request_status', DB::raw('COUNT(DISTINCT brd.id) as total'))
+app\Http\Controllers\Api\CommonController.php:4842: $q->whereRaw('LOWER(keyword) REGEXP ?', [$regex])
+app\Http\Controllers\Api\CommonController.php:4845: ->orWhereRaw('? REGEXP LOWER(keyword)', [$keyword]);
+app\Http\Controllers\Api\DriverController.php:1808: $subQuery->select(DB::raw(1))
+app\Http\Controllers\Api\DriverController.php:1814: $sub->select(DB::raw(1))
+app\Http\Controllers\Api\DriverController.php:5864: ->whereRaw("
+app\Http\Controllers\Api\DriverController.php:5904: $orders = Order::select('orders.id','user_id', 'merchant_order_id as number' ,'business_segment_id', DB::raw("null as laundry_outlet_id") , 'service_type_id', 'drop_location', 'payment_method_id', 'drop_latitude as latitude', 'drop_longitude as longitude', 'order_status', 'country_area_id', 'merchant_id', 'segment_id', 'final_amount_paid', DB::raw("'BUSINESS_SEGMENT' as type"), DB::raw("null as pickup_location"), 'additional_notes', 'brd.created_at', 'otp_for_pickup', 'confirmed_otp_for_pickup', 'driver_vehicle_id',  DB::raw("null as travel_distance"), DB::raw("null as estimate_distance"), DB::raw("null as estimate_time"), DB::raw("null as drop_latitude"), DB::raw("null as drop_longitude"), DB::raw("null as receiver_details"), DB::raw("null as waypoints"), 'prescription_image', 'delivery_mode')
+app\Http\Controllers\Api\DriverController.php:5914: ->select('laundry_outlet_orders.id','user_id', 'merchant_order_id as number', DB::raw("null as business_segment_id"),'laundry_outlet_id', 'service_type_id','drop_location', 'payment_method_id', 'drop_latitude as latitude', 'drop_longitude as longitude', 'order_status', 'country_area_id', 'merchant_id', 'segment_id', 'final_amount_paid', DB::raw("'LAUNDRY_OUTLET' as type"), DB::raw("null as pickup_location"), 'additional_notes', 'brd.created_at', 'travel_distance', DB::raw("null as travel_distance"), DB::raw("null as estimate_distance"), DB::raw("null as estimate_time"), DB::raw("null as drop_latitude"), DB::raw("null as drop_longitude"), DB::raw("null as receiver_details"), DB::raw("null as waypoints"), 'order_item_images')
+app\Http\Controllers\Api\DriverController.php:5925: ->select('bookings.id', 'user_id','merchant_booking_id as number',  DB::raw("null as business_segment_id"), DB::raw("null as laundry_outlet_id"), 'service_type_id', 'drop_location', 'payment_method_id', 'pickup_latitude as latitude', 'pickup_longitude as longitude', 'booking_status as order_status', 'country_area_id', 'merchant_id', 'segment_id',  DB::raw("null as final_amount_paid"), DB::raw("'TAXI_DELIVERY' as type"), 'pickup_location', 'additional_notes', 'bookings.created_at',DB::raw("null as travel_distance") ,  'estimate_distance', 'estimate_time', 'drop_latitude', 'drop_longitude', 'receiver_details','waypoints', 'estimate_bill')
+app\Http\Controllers\Api\DriverController.php:5926: ->whereRaw("
+app\Http\Controllers\Api\DriverEarningController.php:533: $bookingObj = Booking::select( 'bookings.id', 'merchant_booking_id','segment_id', 'country_area_id', 'company_cut', 'driver_cut','bookings.created_at', \DB::raw('COALESCE(SUM(trip_additional_charges.amount),0) as additional_charges') )
+app\Http\Controllers\Api\DriverEarningController.php:609: ->select('request_status', \DB::raw('COUNT(*) as count'))
+app\Http\Controllers\Api\DriverEarningController.php:799: ->selectRaw('COALESCE(SUM(hours),0) as total_hours, COALESCE(SUM(minutes),0) as total_minutes')
+app\Http\Controllers\Api\DriverEarningController.php:817: ->select('request_status', \DB::raw('COUNT(*) as count'))
+app\Http\Controllers\Api\DriverEarningController.php:1133: ->select('request_status', \DB::raw('COUNT(*) as count'))
+app\Http\Controllers\Api\DriverVehicleController.php:484: $sub->selectRaw(1)
+app\Http\Controllers\Api\MainScreenController.php:364: ->selectRaw('segment_id, COUNT(*) as cnt')
+app\Http\Controllers\Api\NodeApiController.php:75: $q->whereRaw('( is_suspended is NULL or is_suspended < "'.$current_date.'" )');
+app\Http\Controllers\Api\OrderController.php:1948: ->select('request_status', \DB::raw('COUNT(*) as count'))
+app\Http\Controllers\Api\PlumberController.php:1309: //            ->leftJoin(DB::raw('(SELECT dsr.driver_id, CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating FROM `driver_segment_ratings` as dsr GROUP BY dsr.driver_id) dsr'), 'handyman_orders.driver_id', '=', 'dsr.driver_id')
+app\Http\Controllers\Helper\CommonController.php:463: $query->whereRaw(DB::raw("find_in_set($base_area_id,base_areas)"));
+app\Http\Controllers\Helper\ExtraCharges.php:22: $pricecards = ExtraCharge::where([['price_card_id', '=', $price_card_id], ['slot_status', '=', 1]])->whereRaw("FIND_IN_SET($dayId,slot_week_days)")->get()->toArray();
+app\Http\Controllers\Helper\PriceController.php:1159: $q->whereRaw("find_in_set('".$current_day."', week_days)")->orWhereNull("week_days");
+app\Http\Controllers\Helper\ReferralController.php:785: $userQuery->select(DB::raw(1))
+app\Http\Controllers\Helper\ReferralController.php:790: $driverQuery->select(DB::raw(1))
+app\Http\Controllers\Merchant\BookingController.php:153: $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")
+app\Http\Controllers\Merchant\BookingController.php:164: $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\BookingController.php:204: //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\BookingController.php:213: //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\BookingController.php:254: //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\BookingController.php:263: //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\BookingController.php:1052: //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\BookingController.php:1058: //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\BookingController.php:1094: $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\BookingController.php:1445: $query = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as ride_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'), DB::raw('SUM(booking_fee) as booking_fee'))
+app\Http\Controllers\Merchant\BookingController.php:1458: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\BookingController.php:1472: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\BusDriverController.php:901: //        $driver_wallet = DB::table('driver_wallet_transactions')->select(DB::raw('SUM(amount) as wallet_amount'))->where(['merchant_id' => $merchant_id, 'driver_id' => $driver->id])->first();
+app\Http\Controllers\Merchant\BusDriverController.php:2207: //    // //                $ride_amount = BookingTransaction::select(DB::raw("sum('driver_earning') as driver_earning"))->whereIn("booking_id",$arr_ride_id)->first();
+app\Http\Controllers\Merchant\BusDriverController.php:2216: //    // //                $order_amount = BookingTransaction::select(DB::raw("sum('driver_earning') as driver_earning"))->whereIn("order_id", $arr_order_id)->first();
+app\Http\Controllers\Merchant\BusDriverController.php:2225: //    // //                $booking_amount = BookingTransaction::select(DB::raw("sum('driver_earning') as driver_earning"))->whereIn("handyman_order_id", $arr_booking_id)->first();
+app\Http\Controllers\Merchant\BusDriverController.php:2257: //    //         $query = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as ride_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\BusDriverController.php:2273: //    //                     $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\BusDriverController.php:2290: //    //                     $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\BusDriverController.php:2318: //    //         $query = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as order_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\BusDriverController.php:2334: //    //                     $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\BusDriverController.php:2351: //    //                     $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\BusDriverController.php:2389: //    //         $query = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as booking_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\BusDriverController.php:2404: //    //                     $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\BusDriverController.php:2421: //    //                     $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\BusinessSegmentController.php:525: $business_income = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as order_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\BusinessSegmentController.php:561: $income = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as order_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\CarpoolingOfferRideController.php:152: //             $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date,$end_date]);
+app\Http\Controllers\Merchant\CarpoolingOfferRideController.php:178: //     $query = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as ride_amount'),DB::raw('SUM(company_earning) as merchant_earning'),DB::raw('SUM(driver_earning) as driver_earning'),DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\CarpoolingOfferRideController.php:193: //                 $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date,$end_date]);
+app\Http\Controllers\Merchant\CarpoolingOfferRideController.php:210: //                 $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date,$end_date]);
+app\Http\Controllers\Merchant\DashBoardController.php:199: ->select('bt.id', 'bt.booking_id', 'b.segment_id', DB::raw('SUM(bt.discount_amount) as discount_amount'), DB::raw('SUM(bt.company_earning) as company_earning'), DB::raw('SUM(bt.booking_fee) as booking_fee'))
+app\Http\Controllers\Merchant\DashBoardController.php:276: ->select('bt.id', 'bt.booking_id', 'o.segment_id', DB::raw('SUM(bt.discount_amount) as discount_amount'), DB::raw('SUM(bt.company_gross_total) as company_earning'))
+app\Http\Controllers\Merchant\DashBoardController.php:304: ->select('bt.id', 'bt.booking_id', 'ho.segment_id', DB::raw('SUM(bt.discount_amount) as discount_amount'), DB::raw('SUM(bt.company_earning) as company_earning'))
+app\Http\Controllers\Merchant\DashBoardController.php:344: ->where(DB::raw('CAST(wallet_money AS DOUBLE)'), '<', 0)
+app\Http\Controllers\Merchant\DashBoardController.php:611: DB::raw('SUM(bt.company_earning) as company_earning'),
+app\Http\Controllers\Merchant\DashBoardController.php:612: DB::raw('SUM(bt.discount_amount) as discount_amount')
+app\Http\Controllers\Merchant\DashBoardController.php:700: ->select('bt.id', 'bt.booking_id', 'b.segment_id', DB::raw('SUM(bt.discount_amount) as discount_amount'), DB::raw('SUM(bt.company_earning) as company_earning'))
+app\Http\Controllers\Merchant\DashBoardController.php:744: ->select('bt.id', 'bt.booking_id', 'o.segment_id', DB::raw('SUM(bt.discount_amount) as discount_amount'), DB::raw('SUM(bt.company_gross_total) as company_earning'))
+app\Http\Controllers\Merchant\DashBoardController.php:768: ->select('bt.id', 'bt.booking_id', 'ho.segment_id', DB::raw('SUM(bt.discount_amount) as discount_amount'), DB::raw('SUM(bt.company_earning) as company_earning'))
+app\Http\Controllers\Merchant\DashBoardController.php:1770: ->select('request_status', DB::raw('COUNT(*) as count'))
+app\Http\Controllers\Merchant\DashBoardController.php:1879: ->select('bt.id', 'bt.booking_id', 'b.segment_id', DB::raw('SUM(bt.discount_amount) as discount_amount'), DB::raw('SUM(bt.company_earning) as company_earning'), DB::raw('SUM(bt.booking_fee) as booking_fee'))
+app\Http\Controllers\Merchant\DashBoardController.php:1916: $query->whereBetween(DB::raw('DATE(date)'), [
+app\Http\Controllers\Merchant\DriverController.php:1463: $driver_wallet = DB::table('driver_wallet_transactions')->select(DB::raw('SUM(amount) as wallet_amount'))->where(['merchant_id' => $merchant_id, 'driver_id' => $driver->id])->first();
+app\Http\Controllers\Merchant\DriverController.php:1809: $driver_wallet = DB::table('driver_wallet_transactions')->select(DB::raw('SUM(amount) as wallet_amount'))->where(['merchant_id' => $merchant_id, 'driver_id' => $driver->id])->first();
+app\Http\Controllers\Merchant\DriverController.php:3142: //                $ride_amount = BookingTransaction::select(DB::raw("sum('driver_earning') as driver_earning"))->whereIn("booking_id",$arr_ride_id)->first();
+app\Http\Controllers\Merchant\DriverController.php:3151: //                $order_amount = BookingTransaction::select(DB::raw("sum('driver_earning') as driver_earning"))->whereIn("order_id", $arr_order_id)->first();
+app\Http\Controllers\Merchant\DriverController.php:3160: //                $booking_amount = BookingTransaction::select(DB::raw("sum('driver_earning') as driver_earning"))->whereIn("handyman_order_id", $arr_booking_id)->first();
+app\Http\Controllers\Merchant\DriverController.php:3193: $query = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as ride_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\DriverController.php:3209: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\DriverController.php:3226: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\DriverController.php:3253: $query = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as order_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\DriverController.php:3269: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\DriverController.php:3286: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\DriverController.php:3324: $query = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as booking_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\DriverController.php:3339: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\DriverController.php:3356: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\DriverController.php:3555: $parameter = DB::raw('CONCAT_WS(" ", drivers.first_name, drivers.last_name)');
+app\Http\Controllers\Merchant\HandymanOrderController.php:105: $query = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as booking_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(tip) as tip'), DB::raw('SUM(tax_amount) as tax'), DB::raw('SUM(discount_amount) as discount'))
+app\Http\Controllers\Merchant\HandymanOrderController.php:120: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\HandymanOrderController.php:137: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\HandymanStoreController.php:426: //            $business_income = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as order_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\HandymanStoreController.php:462: //        $income = BookingTransaction::select(DB::raw('SUM(customer_paid_amount) as order_amount'), DB::raw('SUM(company_earning) as merchant_earning'), DB::raw('SUM(driver_earning) as driver_earning'), DB::raw('SUM(business_segment_earning) as store_earning'))
+app\Http\Controllers\Merchant\LocalizationManagementController.php:118: $query->whereRaw('1 = 0');
+app\Http\Controllers\Merchant\ReferralSystemController.php:256: $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Http\Controllers\Merchant\ReferralSystemController.php:266: $userQuery->select(DB::raw(1))
+app\Http\Controllers\Merchant\ReferralSystemController.php:271: $driverQuery->select(DB::raw(1))
+app\Http\Controllers\Merchant\ReportController.php:79: $q->whereRaw("CONCAT(`first_name`, `last_name`) LIKE ? ", "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\ReportController.php:85: $q->whereRaw("CONCAT(`first_name`, `last_name`) LIKE ? ", "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\ReportController.php:131: ,\DB::raw('COUNT(*)AS total_trip')
+app\Http\Controllers\Merchant\ReportController.php:132: ,\DB::raw('SUM(CASE WHEN request_status = 1 THEN 1 ELSE 0 END )AS no_response')
+app\Http\Controllers\Merchant\ReportController.php:133: ,\DB::raw('SUM(CASE WHEN request_status = 2 THEN 1 ELSE 0 END )AS accepted')
+app\Http\Controllers\Merchant\ReportController.php:134: ,\DB::raw('SUM(CASE WHEN request_status = 3 THEN 1 ELSE 0 END )AS reject')
+app\Http\Controllers\Merchant\ReportController.php:137: $q->whereBetween(DB::raw('DATE(created_at)'), array($from, $to));
+app\Http\Controllers\Merchant\ReportController.php:142: $query->whereBetween(DB::raw('DATE(created_at)'), array($from, $to));
+app\Http\Controllers\Merchant\ReportController.php:171: $parameter = \DB::raw('concat(`first_name`, `last_name`)');
+app\Http\Controllers\Merchant\ReportController.php:215: // $parameter = \DB::raw('concat("first_name", "last_name")');
+app\Http\Controllers\Merchant\ReportController.php:345: $drivervehicles = DriverVehicle::selectRaw('vehicle_type_id,count(*) as total')->whereHas('Driver', function ($query) use ($merchant_id) {
+app\Http\Controllers\Merchant\ReportController.php:368: ->select('service_types.serviceName', 'service_type_id', \DB::raw('count(*) as total'))
+app\Http\Controllers\Merchant\ReportController.php:419: $driver = Driver::selectRaw('monthname(created_at) as month,count(*) as number')
+app\Http\Controllers\Merchant\ReportController.php:423: ->orderByRaw('min(created_at) desc')
+app\Http\Controllers\Merchant\ReportController.php:440: $drivers = Driver::selectRaw('country_area_id,count(*) as number')
+app\Http\Controllers\Merchant\ReportController.php:525: $rides = Booking::selectRaw('date(created_at) as date,count(*) as number')
+app\Http\Controllers\Merchant\ReportController.php:529: ->orderByRaw('min(created_at) desc')
+app\Http\Controllers\Merchant\ReportController.php:549: $rides = Booking::selectRaw('monthname(created_at) as month,count(*) as number')
+app\Http\Controllers\Merchant\ReportController.php:553: ->orderByRaw('min(created_at) desc')
+app\Http\Controllers\Merchant\ReportController.php:571: $rides = Booking::selectRaw('year(created_at) as year,count(*) as number')
+app\Http\Controllers\Merchant\ReportController.php:575: ->orderByRaw('min(created_at) desc')
+app\Http\Controllers\Merchant\SubscriptionController.php:294: DB::raw("CONCAT(drivers.first_name, ' ', drivers.last_name) as driver_name"),
+app\Http\Controllers\Merchant\SubscriptionController.php:295: DB::raw("CASE
+app\Http\Controllers\Merchant\SubscriptionController.php:300: DB::raw("drs.created_at as transaction_date"),
+app\Http\Controllers\Merchant\SubscriptionController.php:301: DB::raw("CONVERT_TZ(drs.subscription_for_date, '+00:00', '+03:00') as subscription_date"),
+app\Http\Controllers\Merchant\SubscriptionController.php:302: DB::raw('ROUND(drs.earned, 0) as earning'),
+app\Http\Controllers\Merchant\SubscriptionController.php:304: DB::raw("'' as payment_reference")
+app\Http\Controllers\Merchant\SubscriptionController.php:312: $join->on(DB::raw('trs.payment_transaction_id COLLATE utf8mb4_unicode_ci'), '=', 'drs.transaction_id');
+app\Http\Controllers\Merchant\SubscriptionController.php:397: //                 ->orWhereRaw(
+app\Http\Controllers\Merchant\TransactionController.php:108: $q->where(\DB::raw("concat(`first_name`,' ', `last_name`)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\TransactionController.php:114: $q->where(\DB::raw("concat(`first_name`,' ', `last_name`)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\TransactionController.php:527: $q->where(\DB::raw('concat(`first_name`, `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\TransactionController.php:533: $q->where(\DB::raw('concat(`first_name`, `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\TransactionController.php:586: $q->where(\DB::raw('concat(`first_name`, `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\TransactionController.php:592: $q->where(\DB::raw('concat(`first_name`, `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Http\Controllers\Merchant\TransactionController.php:618: $query->whereBetween(DB::raw('DATE(created_at)'), [$start_date,$end_date]);
+app\Http\Controllers\Merchant\TransactionController.php:658: $query->whereBetween(DB::raw('DATE(created_at)'), [$start_date,$end_date]);
+app\Http\Controllers\Merchant\TransactionController.php:699: $query->whereBetween(DB::raw('DATE(created_at)'), [$start_date,$end_date]);
+app\Http\Controllers\Merchant\TransactionController.php:746: $query->whereBetween(DB::raw('DATE(created_at)'), [$start_date,$end_date]);
+app\Http\Controllers\Merchant\TransactionController.php:764: $query->whereBetween(DB::raw('DATE(created_at)'), [$start_date,$end_date]);
+app\Http\Controllers\Merchant\TransactionController.php:783: $query->whereBetween(DB::raw('DATE(created_at)'), [$start_date,$end_date]);
+app\Http\Controllers\Merchant\TransactionController.php:1085: $q->where(DB::raw('CAST(wallet_amount AS FLOAT)'), '<', $request->wallet_money_filter);
+app\Http\Controllers\Merchant\WhatsappController.php:1208: $results    =   collect(DB::select(DB::raw($query)));
+app\Http\Controllers\SmsGateways\aws\Aws\Sns\Message.php:36: public static function fromRawPostData()
+app\Http\Resources\MainScreenResource.php:277: $query->whereRaw(DB::raw("find_in_set($base_area_id,base_areas)"));
+app\Models\Booking.php:150: $bookings_query->select(DB::raw('*,( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( pickup_latitude ) ) * cos( radians( pickup_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( pickup_latitude ) ) ) ) AS distance'))
+app\Models\Booking.php:159: //                ->where(DB::raw('CONCAT_WS(" ", later_booking_date, later_booking_time)'), '>=', date('Y-m-d H:i'))
+app\Models\Booking.php:188: $bookings_query->select(DB::raw('*,( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( pickup_latitude ) ) * cos( radians( pickup_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( pickup_latitude ) ) ) ) AS distance'))
+app\Models\Booking.php:191: //                ->where(DB::raw('CONCAT_WS(" ", later_booking_date, later_booking_time)'), '>=', date('Y-m-d H:i'))
+app\Models\BusBooking.php:158: //    //         ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) AS pick_top'))
+app\Models\BusBooking.php:183: //    //             ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $latitude . ')) * cos(radians(start_point.latitude)) * cos( radians(start_point.longitude) -  radians(' . $longitude . ') ) + sin(radians(' . $latitude . ')) * sin(radians(start_point.latitude)))) AS pickup_distance'))
+app\Models\BusBooking.php:184: //    //             ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $drop_latitude . ')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians(' . $drop_longitude . ') ) + sin(radians(' . $drop_latitude . ')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusBooking.php:190: //    //                     ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusBooking.php:200: //    //         // $query = DB::select("SELECT  r.id AS route_id, r.start_point AS start_point_id, start_point.latitude AS start_latitude, start_point.longitude AS start_longitude, r.end_point AS end_point_id, end_point.latitude AS end_latitude, end_point.longitude AS end_longitude,
+app\Models\BusBooking.php:267: //                ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $latitude . ')) * cos(radians(start_point.latitude)) * cos( radians(start_point.longitude) -  radians(' . $longitude . ') ) + sin(radians(' . $latitude . ')) * sin(radians(start_point.latitude)))) AS pickup_distance'))
+app\Models\BusBooking.php:268: //                ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $drop_latitude . ')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians(' . $drop_longitude . ') ) + sin(radians(' . $drop_latitude . ')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusBooking.php:274: //                        ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusBooking.php:284: //            // $query = DB::select("SELECT  r.id AS route_id, r.start_point AS start_point_id, start_point.latitude AS start_latitude, start_point.longitude AS start_longitude, r.end_point AS end_point_id, end_point.latitude AS end_latitude, end_point.longitude AS end_longitude,
+app\Models\BusBooking.php:349: //    //                     ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusBooking.php:384: //            //             ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusBooking.php:400: //                ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $latitude . ')) * cos(radians(bus_stops.latitude)) * cos( radians(bus_stops.longitude) -  radians(' . $longitude . ') ) + sin(radians(' . $latitude . ')) * sin(radians(bus_stops.latitude)))) AS pickup_distance'))
+app\Models\BusBooking.php:401: //                ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $drop_latitude . ')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians(' . $drop_longitude . ') ) + sin(radians(' . $drop_latitude . ')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusBooking.php:402: //                // ->addSelect(DB::raw('(CASE WHEN pickup_distance = MIN(pickup_distance) THEN true ELSE false END )AS stop_match'))
+app\Models\BusBooking.php:409: //                        ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusBookingDetail.php:92: //    //         ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) AS pick_top'))
+app\Models\BusBookingDetail.php:117: //    //             ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $latitude . ')) * cos(radians(start_point.latitude)) * cos( radians(start_point.longitude) -  radians(' . $longitude . ') ) + sin(radians(' . $latitude . ')) * sin(radians(start_point.latitude)))) AS pickup_distance'))
+app\Models\BusBookingDetail.php:118: //    //             ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $drop_latitude . ')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians(' . $drop_longitude . ') ) + sin(radians(' . $drop_latitude . ')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusBookingDetail.php:124: //    //                     ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusBookingDetail.php:134: //    //         // $query = DB::select("SELECT  r.id AS route_id, r.start_point AS start_point_id, start_point.latitude AS start_latitude, start_point.longitude AS start_longitude, r.end_point AS end_point_id, end_point.latitude AS end_latitude, end_point.longitude AS end_longitude,
+app\Models\BusBookingDetail.php:201: //                ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $latitude . ')) * cos(radians(start_point.latitude)) * cos( radians(start_point.longitude) -  radians(' . $longitude . ') ) + sin(radians(' . $latitude . ')) * sin(radians(start_point.latitude)))) AS pickup_distance'))
+app\Models\BusBookingDetail.php:202: //                ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $drop_latitude . ')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians(' . $drop_longitude . ') ) + sin(radians(' . $drop_latitude . ')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusBookingDetail.php:208: //                        ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusBookingDetail.php:218: //            // $query = DB::select("SELECT  r.id AS route_id, r.start_point AS start_point_id, start_point.latitude AS start_latitude, start_point.longitude AS start_longitude, r.end_point AS end_point_id, end_point.latitude AS end_latitude, end_point.longitude AS end_longitude,
+app\Models\BusBookingDetail.php:283: //    //                     ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusBookingDetail.php:318: //            //             ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusBookingDetail.php:334: //                ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $latitude . ')) * cos(radians(bus_stops.latitude)) * cos( radians(bus_stops.longitude) -  radians(' . $longitude . ') ) + sin(radians(' . $latitude . ')) * sin(radians(bus_stops.latitude)))) AS pickup_distance'))
+app\Models\BusBookingDetail.php:335: //                ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $drop_latitude . ')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians(' . $drop_longitude . ') ) + sin(radians(' . $drop_latitude . ')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusBookingDetail.php:336: //                // ->addSelect(DB::raw('(CASE WHEN pickup_distance = MIN(pickup_distance) THEN true ELSE false END )AS stop_match'))
+app\Models\BusBookingDetail.php:343: //                        ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusDriverMapping.php:60: //                ->addSelect(DB::raw('( ' . $radius . ' * acos(cos(radians('.$latitude.')) * cos(radians(start_point.latitude)) * cos( radians(start_point.longitude) -  radians('.$longitude.') ) + sin(radians('.$latitude.')) * sin(radians(start_point.latitude)))) AS pickup_distance'))
+app\Models\BusDriverMapping.php:61: //                ->addSelect(DB::raw('( ' . $radius . ' * acos(cos(radians('.$drop_latitude.')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians('.$drop_longitude.') ) + sin(radians('.$drop_latitude.')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusDriverMapping.php:67: //                    ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusDriverMapping.php:76: //            // $query = DB::select("SELECT  r.id AS route_id, r.start_point AS start_point_id, start_point.latitude AS start_latitude, start_point.longitude AS start_longitude, r.end_point AS end_point_id, end_point.latitude AS end_latitude, end_point.longitude AS end_longitude,
+app\Models\BusRoute.php:89: //         ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) AS pick_top'))
+app\Models\BusRoute.php:114: //             ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $latitude . ')) * cos(radians(start_point.latitude)) * cos( radians(start_point.longitude) -  radians(' . $longitude . ') ) + sin(radians(' . $latitude . ')) * sin(radians(start_point.latitude)))) AS pickup_distance'))
+app\Models\BusRoute.php:115: //             ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $drop_latitude . ')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians(' . $drop_longitude . ') ) + sin(radians(' . $drop_latitude . ')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusRoute.php:121: //                     ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusRoute.php:131: //         // $query = DB::select("SELECT  r.id AS route_id, r.start_point AS start_point_id, start_point.latitude AS start_latitude, start_point.longitude AS start_longitude, r.end_point AS end_point_id, end_point.latitude AS end_latitude, end_point.longitude AS end_longitude,
+app\Models\BusRoute.php:205: ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $latitude . ')) * cos(radians(start_point.latitude)) * cos( radians(start_point.longitude) -  radians(' . $longitude . ') ) + sin(radians(' . $latitude . ')) * sin(radians(start_point.latitude)))) AS pickup_distance'))
+app\Models\BusRoute.php:206: ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $drop_latitude . ')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians(' . $drop_longitude . ') ) + sin(radians(' . $drop_latitude . ')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusRoute.php:212: ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusRoute.php:225: // $query = DB::select("SELECT  r.id AS route_id, r.start_point AS start_point_id, start_point.latitude AS start_latitude, start_point.longitude AS start_longitude, r.end_point AS end_point_id, end_point.latitude AS end_latitude, end_point.longitude AS end_longitude,
+app\Models\BusRoute.php:305: ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $drop_latitude . ')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians(' . $drop_longitude . ') ) + sin(radians(' . $drop_latitude . ')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusRoute.php:325: ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $latitude . ')) * cos(radians(start_point.latitude)) * cos( radians(start_point.longitude) -  radians(' . $longitude . ') ) + sin(radians(' . $latitude . ')) * sin(radians(start_point.latitude)))) AS pickup_distance'))
+app\Models\BusRoute.php:390: //                     ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\BusRoute.php:427: ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $latitude . ')) * cos(radians(bus_stops.latitude)) * cos( radians(bus_stops.longitude) -  radians(' . $longitude . ') ) + sin(radians(' . $latitude . ')) * sin(radians(bus_stops.latitude)))) AS pickup_distance'))
+app\Models\BusRoute.php:428: ->addSelect(DB::raw('( ' . $earth_radius . ' * acos(cos(radians(' . $drop_latitude . ')) * cos(radians(end_point.latitude)) * cos( radians(end_point.longitude) - radians(' . $drop_longitude . ') ) + sin(radians(' . $drop_latitude . ')) *sin(radians(end_point.latitude)))) AS drop_distance'))
+app\Models\BusRoute.php:433: ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Models\CancelPolicy.php:51: })->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '".$locale."' THEN 1 ELSE 2 END")->first();
+app\Models\CarpoolingRideDetail.php:71: DB::raw('(6371 * ACOS(COS(RADIANS(' . $dropLatLng['lat'] . ')) * COS(RADIANS('.$drop_lat.')) * COS(RADIANS(' . $dropLatLng['lng'] . ') - RADIANS('.$drop_long.')) + SIN(RADIANS(' . $dropLatLng['lat'] . ')) * SIN(RADIANS('.$drop_lat.')))) AS drop_distance')
+app\Models\CarpoolingRideDetail.php:78: ->where(DB::raw('DATE(crd.ride_datetime)'), '=', $date_time)
+app\Models\CarpoolingRideDetail.php:80: ->havingRaw('drop_distance <= 20')
+app\Models\CarpoolingRideDetail.php:94: DB::raw('(6371 * ACOS(COS(RADIANS('.$pickupLatLng['lat'].')) * COS(RADIANS('.$latitude.')) * COS(RADIANS('.$longitude.') - RADIANS('.$pickupLatLng['lng'].')) + SIN(RADIANS('.$pickupLatLng['lat'].')) * SIN(RADIANS('.$latitude.')))) AS pickup_distance'),
+app\Models\CarpoolingRideDetail.php:95: DB::raw('CONCAT(users.first_name, " ", users.last_name) AS full_name'),
+app\Models\CarpoolingRideDetail.php:108: ->where(DB::raw('DATE(carpooling_ride_details.ride_datetime)'), '=', $date_time)
+app\Models\CarpoolingRideDetail.php:110: ->havingRaw('pickup_distance <= 20')
+app\Models\Driver.php:492: //                        ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
+app\Models\Driver.php:529: //                        ->whereRaw('( is_suspended is NULL or is_suspended < ? )' , [date('Y-m-d H:i:s')])
+app\Models\Driver.php:596: //                                ->whereRaw('ddv.driver_id = drivers.id');
+app\Models\Driver.php:607: ////                        $query2->select('b.driver_id',DB::raw('sum("final_amount_paid") as cash_amount'))
+app\Models\Driver.php:623: ////                        $under_cash_limit_drivers  = Booking::select('b.driver_id',DB::raw('sum("final_amount_paid") as cash_amount'))
+app\Models\Driver.php:919: $q->addSelect(DB::raw('drivers.id AS driver_id'));
+app\Models\Driver.php:968: ->whereRaw('( is_suspended is NULL or is_suspended < ? )', [date('Y-m-d H:i:s')]);
+app\Models\Driver.php:1063: ->whereRaw('ddv.driver_id = drivers.id');
+app\Models\Driver.php:1136: //                        ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
+app\Models\Driver.php:1142: $query->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'));
+app\Models\Driver.php:1144: $query->addSelect(DB::raw('drivers.id AS driver_id'));
+app\Models\Driver.php:1200: ->whereRaw('( is_suspended is NULL or is_suspended < ? )', [date('Y-m-d H:i:s')])
+app\Models\Driver.php:1283: ->whereRaw('ddv.driver_id = drivers.id');
+app\Models\Driver.php:1304: $under_cash_limit_drivers = Booking::select('b.driver_id', DB::raw('SUM(final_amount_paid) as cash_amount'))
+app\Models\Driver.php:1424: $booked_driver_ids = Booking::select(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( drop_latitude ) ) * cos( radians( drop_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( drop_latitude ) ) ) ) AS distance, driver_id, id, merchant_booking_id'))
+app\Models\Driver.php:1427: $query = Driver::select($select)->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
+app\Models\Driver.php:1459: ->whereRaw('( is_suspended is NULL or is_suspended < ? )', [date('Y-m-d H:i:s')])
+app\Models\Driver.php:1519: ->whereRaw('ddv.driver_id = drivers.id');
+app\Models\Driver.php:1530: $current_booking = Booking::select(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $driver->current_latitude . ') ) * cos( radians( drop_latitude ) ) * cos( radians( drop_longitude ) - radians(' . $driver->current_longitude . ') ) + sin( radians(' . $driver->current_latitude . ') ) * sin( radians( drop_latitude ) ) ) ) AS first_distance, ( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( drop_latitude ) ) * cos( radians( drop_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( drop_latitude ) ) ) ) AS second_distance'))
+app\Models\Driver.php:1566: $drivers_active_home = DriverAddress::select(DB::raw('*, ( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) AS distance,driver_addresses.id AS driver_addresses_id'))
+app\Models\Driver.php:1610: $return_data = PoolRideList::select(DB::raw('*, ( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( drop_lat ) ) * cos( radians( drop_long ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( drop_lat ) ) ) ) AS distance'))
+app\Models\Driver.php:1664: ->addSelect(DB::raw('1 as is_favourite'));
+app\Models\Driver.php:1669: //                ->leftJoin(DB::raw('(SELECT dsr.driver_id, CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating FROM `driver_segment_ratings` as dsr GROUP BY dsr.driver_id) dsr'),'drivers.id','=','dsr.driver_id')
+app\Models\Driver.php:1672: ->addSelect(DB::raw('COALESCE(( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ), 0) AS distance,da.driver_id,da.latitude,da.longitude,da.address_status'))
+app\Models\Driver.php:1764: ->whereRaw('( is_suspended is NULL or is_suspended < ? )', [date('Y-m-d H:i:s')])
+app\Models\Driver.php:1804: //            ->addSelect(DB::raw("CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating"), 'dsr.driver_id')
+app\Models\Driver.php:1806: ->leftJoin(DB::raw('(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM `favourite_drivers` as fd where( segment_id="' . $segment_id . '" or segment_id IS NULL) and fd.user_id = "' . $arr_reqest->user_id . '" GROUP BY fd.driver_id) fd'), 'drivers.id', '=', 'fd.driver_id')
+app\Models\Driver.php:1887: ->leftJoin(DB::raw('(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM `favourite_drivers` as fd where( segment_id="' . $segment_id . '" or segment_id IS NULL AND user_id="' . $user_id . '" or user_id IS NULL) GROUP BY fd.driver_id) fd'), 'drivers.id', '=', 'fd.driver_id')
+app\Models\Driver.php:2082: ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
+app\Models\Driver.php:2084: //                ->leftJoin(DB::raw('(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM `favourite_drivers` as fd where( segment_id="' . $segment_id . '" or segment_id IS NULL AND user_id="' . $user_id . '" or user_id IS NULL) GROUP BY fd.driver_id) fd'), 'drivers.id', '=', 'fd.driver_id')
+app\Models\Driver.php:2210: //            ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
+app\Models\Driver.php:2246: ->whereRaw('( is_suspended is NULL or is_suspended < ? )', [date('Y-m-d H:i:s')])
+app\Models\Driver.php:2306: ->whereRaw('ddv.driver_id = drivers.id');
+app\Models\DriverBackup.php:295: ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
+app\Models\DriverBackup.php:336: ->whereRaw('( is_suspended is NULL or is_suspended < ? )' , [date('Y-m-d H:i:s')])
+app\Models\DriverBackup.php:394: ->whereRaw('ddv.driver_id = drivers.id');
+app\Models\DriverBackup.php:483: $drivers_active_home = DriverAddress::select(DB::raw('*, ( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) AS distance,driver_addresses.id AS driver_addresses_id'))
+app\Models\DriverBackup.php:503: $return_data = PoolRideList::select(DB::raw('*, ( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( drop_lat ) ) * cos( radians( drop_long ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( drop_lat ) ) ) ) AS distance'))
+app\Models\DriverBackup.php:523: $drivers = Driver::select(DB::raw('*, ( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
+app\Models\DriverBackup.php:528: ->whereRaw('( is_suspended is NULL or is_suspended < "'.$current_date.'" )')
+app\Models\DriverBackup.php:536: $drivers = Driver::select(DB::raw('*, ( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
+app\Models\DriverBackup.php:541: ->whereRaw('( is_suspended is NULL or is_suspended < "'.$current_date.'" )')
+app\Models\DriverBackup.php:586: ->leftJoin(DB::raw('(SELECT dsr.driver_id, CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating FROM `driver_segment_ratings` as dsr GROUP BY dsr.driver_id) dsr'),'drivers.id','=','dsr.driver_id')
+app\Models\DriverBackup.php:590: $q->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) AS distance,driver_id,latitude,longitude'))
+app\Models\DriverBackup.php:646: ->whereRaw('( is_suspended is NULL or is_suspended < ? )' , [date('Y-m-d H:i:s')])
+app\Models\DriverBackup.php:684: ->addSelect(DB::raw("CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating"),'dsr.driver_id')
+app\Models\DriverBackup.php:686: ->leftJoin(DB::raw('(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM `favourite_drivers` as fd where( segment_id="'.$segment_id.'" or segment_id IS NULL) GROUP BY fd.driver_id) fd'),'drivers.id','=','fd.driver_id')
+app\Models\DriverBackup.php:729: ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
+app\Models\DriverBackup.php:730: //            ->addSelect(DB::raw("CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating"),'dsr.driver_id')
+app\Models\DriverBackup.php:732: ->leftJoin(DB::raw('(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM `favourite_drivers` as fd where( segment_id="'.$segment_id.'" or segment_id IS NULL AND user_id="'.$user_id.'" or user_id IS NULL) GROUP BY fd.driver_id) fd'),'drivers.id','=','fd.driver_id')
+app\Models\Segment.php:75: })->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '".$locale."' THEN 1 ELSE 2 END")->first();
+app\Models\ServiceTimeSlot.php:64: //                     $q->join(DB::raw('(SELECT das.service_time_slot_detail_id,das.id as driver_availability_slot_id  FROM `driver_availability_slots` as das where( segment_id='.$segment_id.' or segment_id IS NULL) and ( driver_id='.$driver_id.' or driver_id IS NULL)) das'),'service_time_slot_details.id','=','das.service_time_slot_detail_id');
+app\Models\ServiceTimeSlot.php:71: //                   $q->leftJoin(DB::raw('(SELECT das.service_time_slot_detail_id,das.id as driver_availability_slot_id  FROM `driver_availability_slots` as das where( segment_id='.$segment_id.' or segment_id IS NULL) and ( driver_id='.$driver_id.' or driver_id IS NULL)) das'),'service_time_slot_details.id','=','das.service_time_slot_detail_id');
+app\Models\ServiceTimeSlot.php:163: //$q->join(DB::raw('(SELECT das.service_time_slot_detail_id,das.id as driver_availability_slot_id  FROM `driver_availability_slots` as das where( segment_id='.$segment_id.' or segment_id IS NULL) and ( driver_id='.$driver_id.' or driver_id IS NULL)) das'),'service_time_slot_details.id','=','das.service_time_slot_detail_id');
+app\Models\ServiceTimeSlot.php:184: // $q->leftJoin(DB::raw('(SELECT das.service_time_slot_detail_id,das.id as driver_availability_slot_id  FROM `driver_availability_slots` as das where( segment_id='.$segment_id.' or segment_id IS NULL) and ( driver_id='.$driver_id.' or driver_id IS NULL)) das'),'service_time_slot_details.id','=','das.service_time_slot_detail_id');
+app\Models\ServiceTimeSlot.php:272: //                        //$q->join(DB::raw('(SELECT das.service_time_slot_detail_id,das.id as driver_availability_slot_id  FROM `driver_availability_slots` as das where( segment_id='.$segment_id.' or segment_id IS NULL) and ( driver_id='.$driver_id.' or driver_id IS NULL)) das'),'service_time_slot_details.id','=','das.service_time_slot_detail_id');
+app\Models\ServiceTimeSlot.php:293: //                        // $q->leftJoin(DB::raw('(SELECT das.service_time_slot_detail_id,das.id as driver_availability_slot_id  FROM `driver_availability_slots` as das where( segment_id='.$segment_id.' or segment_id IS NULL) and ( driver_id='.$driver_id.' or driver_id IS NULL)) das'),'service_time_slot_details.id','=','das.service_time_slot_detail_id');
+app\Models\ServiceType.php:65: })->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '".$locale."' THEN 1 ELSE 2 END")->first();
+app\Models\ServiceType.php:168: })->where("handyman_store_id", $handyman_store_id)->orderByRaw("CASE WHEN locale = '".$locale."' THEN 1 ELSE 2 END")->first();
+app\Models\BusinessSegment\Order.php:207: $query->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Models\LaundryOutlet\LaundryOutletOrder.php:192: $query->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+app\Traits\AreaTrait.php:86: $query->whereRaw(DB::raw("find_in_set($base_area_id,base_areas)"));
+app\Traits\BookingTrait.php:123: $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Traits\BookingTrait.php:129: $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Traits\BookingTrait.php:149: $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+app\Traits\BookingTrait.php:155: $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+app\Traits\BookingTrait.php:544: $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")
+app\Traits\BookingTrait.php:551: $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")
+app\Traits\BookingTrait.php:558: $query->whereBetween(DB::raw('DATE(created_at)'), [$start_date,$end_date]);
+app\Traits\BusDriverTrait.php:115: $parameter = DB::raw('CONCAT_WS(" ", first_name, last_name)');
+app\Traits\BusDriverTrait.php:371: \DB::raw('COUNT(*)AS total_trip'),
+app\Traits\BusDriverTrait.php:372: \DB::raw('SUM(CASE WHEN request_status = 1 THEN 1 ELSE 0 END )AS no_response'),
+app\Traits\BusDriverTrait.php:373: \DB::raw('SUM(CASE WHEN request_status = 2 THEN 1 ELSE 0 END )AS accepted'),
+app\Traits\BusDriverTrait.php:374: \DB::raw('SUM(CASE WHEN request_status = 3 THEN 1 ELSE 0 END )AS reject')
+app\Traits\BusDriverTrait.php:377: $q->whereBetween(DB::raw('DATE(created_at)'), array($from, $to));
+app\Traits\BusDriverTrait.php:382: $query->whereBetween(DB::raw('DATE(created_at)'), array($from, $to));
+app\Traits\BusDriverTrait.php:618: DB::raw('COUNT(*)AS all_drivers'),
+app\Traits\BusDriverTrait.php:619: DB::raw('COUNT(CASE WHEN signupStep = "9"  THEN 1  END) AS approved'),
+app\Traits\BusDriverTrait.php:620: DB::raw('COUNT(CASE WHEN signupStep = "8" AND reject_driver = "1"  THEN 1  END) AS pending'),
+app\Traits\BusDriverTrait.php:621: DB::raw('COUNT(CASE WHEN signupStep = "8" AND reject_driver = "2"  THEN 1  END) AS rejected'),
+app\Traits\BusDriverTrait.php:622: DB::raw('COUNT(CASE WHEN signupStep <= "7"  THEN 1  END) AS basic_signup')
+app\Traits\BusStopTrait.php:19: ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Traits\BusStopTrait.php:61: ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Traits\BusStopTrait.php:67: ->where('id','!=',DB::raw("(select start_point from bus_routes where id=".$route_id.")"))
+app\Traits\BusStopTrait.php:68: ->where('id','!=',DB::raw("(select end_point from bus_routes where id=".$route_id.")"));
+app\Traits\DriverTrait.php:103: $q->where(DB::raw('CAST(wallet_money AS FLOAT)'), '<', $request->wallet_money_filter);
+app\Traits\DriverTrait.php:154: $parameter = DB::raw('CONCAT_WS(" ", first_name, last_name)');
+app\Traits\DriverTrait.php:250: $parameter = DB::raw('CONCAT_WS(" ", first_name, last_name)');
+app\Traits\DriverTrait.php:523: \DB::raw('COUNT(*)AS total_trip'),
+app\Traits\DriverTrait.php:524: \DB::raw('SUM(CASE WHEN request_status = 1 THEN 1 ELSE 0 END )AS no_response'),
+app\Traits\DriverTrait.php:525: \DB::raw('SUM(CASE WHEN request_status = 2 THEN 1 ELSE 0 END )AS accepted'),
+app\Traits\DriverTrait.php:526: \DB::raw('SUM(CASE WHEN request_status = 3 THEN 1 ELSE 0 END )AS reject')
+app\Traits\DriverTrait.php:529: $q->whereBetween(DB::raw('DATE(created_at)'), array($from, $to));
+app\Traits\DriverTrait.php:534: $query->whereBetween(DB::raw('DATE(created_at)'), array($from, $to));
+app\Traits\DriverTrait.php:809: DB::raw('COUNT(*)AS all_drivers'),
+app\Traits\DriverTrait.php:810: DB::raw('COUNT(CASE WHEN signupStep = "9"  THEN 1  END) AS approved'),
+app\Traits\DriverTrait.php:811: DB::raw('COUNT(CASE WHEN signupStep = "8" AND reject_driver = "1" AND in_training = "1" AND is_approved = "1"  THEN 1  END) AS pending_training'),
+app\Traits\DriverTrait.php:812: DB::raw($query_string),
+app\Traits\DriverTrait.php:813: DB::raw('COUNT(CASE WHEN signupStep = "8" AND reject_driver = "2"  THEN 1  END) AS rejected'),
+app\Traits\DriverTrait.php:814: DB::raw('COUNT(CASE WHEN signupStep <= "7"  THEN 1  END) AS basic_signup')
+app\Traits\HandymanStoreTrait.php:301: ->addSelect(DB::raw($haversineSQL . ' AS distance'))
+app\Traits\HandymanStoreTrait.php:330: $query->whereRaw($haversineSQL . '<= ?', [$distance]);
+app\Traits\HandymanTrait.php:43: $query->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( drop_latitude ) ) * cos( radians( drop_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( drop_latitude ) ) ) ) AS distance'))
+app\Traits\HandymanTrait.php:69: ->leftJoin(DB::raw('(SELECT dsr.driver_id, CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating FROM `driver_segment_ratings` as dsr GROUP BY dsr.driver_id) dsr'), 'handyman_orders.driver_id', '=', 'dsr.driver_id')
+app\Traits\HandymanTrait.php:105: //$q->orderBy(DB::raw('FIELD(order_status,6,4,1))'));
+app\Traits\LaundryServiceTrait.php:136: ->orderBy(DB::raw('RAND()'))
+app\Traits\LocationTrait.php:141: ->whereBetween(DB::raw('CAST(ROUND(pickup_latitude, 5) AS DECIMAL(10, 5))'), [$min_max_coordinated['minLat'], $min_max_coordinated['maxLat']])
+app\Traits\LocationTrait.php:142: ->whereBetween(DB::raw('CAST(ROUND(pickup_longitude, 5) AS DECIMAL(10, 5))'), [$min_max_coordinated['minLon'], $min_max_coordinated['maxLon']])
+app\Traits\LocationTrait.php:162: $drivers = Driver::whereBetween(DB::raw('CAST(ROUND(current_latitude, 5) AS DECIMAL(10, 5))'), [$min_max_coordinated['minLat'], $min_max_coordinated['maxLat']])
+app\Traits\LocationTrait.php:163: ->whereBetween(DB::raw('CAST(ROUND(current_longitude, 5) AS DECIMAL(10, 5))'), [$min_max_coordinated['minLon'], $min_max_coordinated['maxLon']])
+app\Traits\MerchantTrait.php:673: ->addSelect(DB::raw($haversineSQL . ' AS distance'))
+app\Traits\MerchantTrait.php:743: $query->whereRaw($haversineSQL . '<= ?', [$distance]);
+app\Traits\MerchantTrait.php:918: ->addSelect(DB::raw($haversineSQL . ' AS distance'))
+app\Traits\MerchantTrait.php:927: $query->whereRaw($haversineSQL . '<= ?', [$distance]);
+app\Traits\MerchantTrait.php:967: ->addSelect(DB::raw($haversineSQL . ' AS distance'))
+app\Traits\MerchantTrait.php:974: $query->whereRaw($haversineSQL . '<= ?', [$distance]);
+app\Traits\MerchantTrait.php:1081: ->addSelect(DB::raw($haversineSQL . ' AS distance'))
+app\Traits\MerchantTrait.php:1090: $query->whereRaw($haversineSQL . '<= ?', [$distance]);
+app\Traits\MerchantTrait.php:1409: ->addSelect(DB::raw($haversineSQL . ' AS distance'))
+app\Traits\MerchantTrait.php:1448: $query->whereRaw($haversineSQL . '<= ?', [$distance]);
+app\Traits\MerchantTrait.php:1469: ->addSelect(DB::raw($haversineSQL . ' AS distance'))
+app\Traits\MerchantTrait.php:1475: $query->whereRaw($haversineSQL . '<= ?', [$distance]);
+app\Traits\ProductTrait.php:141: ->orderBy(DB::raw('RAND()'))
+app\Traits\RouteConfigTrait.php:20: ->orWhere("locale", "en")->where("merchant_id", $merchant_id)->orderByRaw("CASE WHEN locale = '" . $locale . "' THEN 1 ELSE 2 END");
+app\Traits\UserTrait.php:45: $q->where(DB::raw('CAST(wallet_balance AS FLOAT)'), '<', $request->wallet_money_filter);
+app\Traits\UserTrait.php:53: $parameter = \DB::raw('CONCAT_WS(" ", first_name, last_name)');
+database\migrations\2019_05_30_115726_create_driver_accounts_table.php:20: $table->timestamp('from_date')->default(DB::raw('CURRENT_TIMESTAMP'));

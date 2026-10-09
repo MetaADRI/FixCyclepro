@@ -133,7 +133,7 @@ trait LaundryServiceTrait
         if($request->return_type == "modified_array")
         {
             $services = $query->where([['status', '=', 1]])
-                ->orderBy(DB::raw('RAND()'))
+                ->orderByRaw('random()')
                 ->get();
             $services = $services->map(function ($item, $key) use($merchant_id,$currency,$trip_calculation_method, $merchant_helper, $format_price)
             {

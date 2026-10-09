@@ -83,7 +83,7 @@ trait AreaTrait{
             ->where(function($q) use($base_area_id, $permission_area_ids){
                 if($base_area_id != NULL){
                     $q->whereHas('RestrictedArea',function($query) use($base_area_id){
-                        $query->whereRaw(DB::raw("find_in_set($base_area_id,base_areas)"));
+                        $query->whereRaw("$base_area_id = ANY(string_to_array(base_areas, ','))");
                     });
                 }
                 if(!empty($permission_area_ids)){

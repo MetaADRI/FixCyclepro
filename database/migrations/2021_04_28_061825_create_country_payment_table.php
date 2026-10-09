@@ -15,7 +15,7 @@ class CreateCountryPaymentTable extends Migration
     {
         Schema::create('country_payment', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('country_id')->unsigned()->index('country_carpooling_document_country_id_foreign');
+            $table->integer('country_id')->unsigned()->index('country_payment_country_id_foreign');
             $table->foreign('country_id')->references('id')->on('countries')->onUpdate('RESTRICT')->onDelete('CASCADE');
             $table->integer('payment_options_configuration_id')->unsigned();
             $table->foreign('payment_options_configuration_id')->references('id')->on('payment_options_configurations')->onUpdate('RESTRICT')->onDelete('CASCADE');

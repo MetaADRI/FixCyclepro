@@ -150,7 +150,7 @@ class BookingController extends Controller
         if ($request->rider) {
             $keyword = $request->rider;
             $query->WhereHas('User', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")
                     ->orWhere('email', 'LIKE', "%$keyword%")
                     ->orWhere('UserPhone', 'LIKE', "%$keyword%");
             });
@@ -161,7 +161,7 @@ class BookingController extends Controller
         if ($request->driver) {
             $keyword = $request->driver;
             $query->WhereHas('Driver', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
             });
         }
         $arr_search = $request->all();
@@ -201,7 +201,7 @@ class BookingController extends Controller
     //        if ($request->rider) {
     //            $keyword = $request->rider;
     //            $query->WhereHas('User', function ($q) use ($keyword) {
-    //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+    //                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
     //            });
     //        }
     //        if ($request->date) {
@@ -210,7 +210,7 @@ class BookingController extends Controller
     //        if ($request->driver) {
     //            $keyword = $request->driver;
     //            $query->WhereHas('Driver', function ($q) use ($keyword) {
-    //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+    //                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
     //            });
     //        }
     //        $bookings = $query->paginate(25);
@@ -251,7 +251,7 @@ class BookingController extends Controller
     //        if ($request->rider) {
     //            $keyword = $request->rider;
     //            $query->WhereHas('User', function ($q) use ($keyword) {
-    //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+    //                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
     //            });
     //        }
     //        if ($request->date) {
@@ -260,7 +260,7 @@ class BookingController extends Controller
     //        if ($request->driver) {
     //            $keyword = $request->driver;
     //            $query->WhereHas('Driver', function ($q) use ($keyword) {
-    //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+    //                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
     //            });
     //        }
     //        $bookings = $query->paginate(25);
@@ -1049,13 +1049,13 @@ public function EstimateBillDetailsBreakup($billDetails_array, $estimate_bill)
     //        if ($request->rider) {
     //            $keyword = $request->rider;
     //            $query->WhereHas('User', function ($q) use ($keyword) {
-    //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+    //                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
     //            });
     //        }
     //        if ($request->driver) {
     //            $keyword = $request->driver;
     //            $query->WhereHas('Driver', function ($q) use ($keyword) {
-    //                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+    //                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
     //            });
     //        }
     //        $bookings = $query->paginate(25);
@@ -1091,7 +1091,7 @@ public function EstimateBillDetailsBreakup($billDetails_array, $estimate_bill)
         if ($request->rider) {
             $keyword = $request->rider;
             $query->WhereHas('User', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`," ", `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
             });
         }
         $bookings = $query->paginate(25);

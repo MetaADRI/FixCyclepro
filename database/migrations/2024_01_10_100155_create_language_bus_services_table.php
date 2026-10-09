@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('language_bus_services', function (Blueprint $table) {
             $table->id();
-            $table->integer('merchant_id')->unsigned()->index('merchant_id');
+            $table->integer('merchant_id')->unsigned()->index('language_bus_services_merchant_id');
             $table->foreign("merchant_id")->on("merchants")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
 
-            $table->bigInteger('bus_service_id')->unsigned()->index('language_bus_service');
+            $table->bigInteger('bus_service_id')->unsigned()->index('language_bus_services_language_bus_service');
             $table->foreign("bus_service_id")->on("bus_services")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
 
             $table->string('locale', 10)->index();

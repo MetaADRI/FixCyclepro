@@ -1156,7 +1156,7 @@ class PriceController extends Controller
             $return_array = $price_card_slab->type == "BASE_FARE" ? true : false;
 
             $slab_details = PriceCardSlabDetail::where("price_card_slab_id",$price_card_slab_id)->where(function($q)use($current_day){
-                $q->whereRaw("find_in_set('".$current_day."', week_days)")->orWhereNull("week_days");
+                $q->whereRaw("'".$current_day."' = ANY(string_to_array(week_days, ','))")->orWhereNull("week_days");
             })->get();
 
             $slab_detail = [];

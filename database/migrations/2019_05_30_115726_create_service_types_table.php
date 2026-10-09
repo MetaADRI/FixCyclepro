@@ -18,7 +18,7 @@ class CreateServiceTypesTable extends Migration {
 
             $table->integer('parent_id')->unsigned()->nullable();
 
-            $table->integer('segment_id')->unsigned()->index('segment_id_foreign');
+            $table->integer('segment_id')->unsigned()->index('service_types_segment_id_foreign');
             $table->foreign('segment_id')->references('id')->on('segments')->onUpdate('RESTRICT')->onDelete('CASCADE');
 
             $table->string('serviceName', 191);

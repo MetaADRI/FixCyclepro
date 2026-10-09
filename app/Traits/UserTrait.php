@@ -50,7 +50,7 @@ trait UserTrait
             switch ($request->parameter) {
                 case "1":
                     //                    $parameter = "first_name";
-                    $parameter = \DB::raw('CONCAT_WS(" ", first_name, last_name)');
+                    $parameter = \DB::raw("CONCAT_WS(' ', first_name, last_name)");
                     break;
                 case "2":
                     $parameter = "email";

@@ -15,7 +15,7 @@ class CreateLanguageBusStopsTable extends Migration
     {
         Schema::create('language_bus_stops', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('bus_stop_id')->unsigned()->index('language_bus_stops');
+            $table->integer('bus_stop_id')->unsigned()->index('language_bus_stops_bus_stop_id');
             $table->foreign("bus_stop_id")->on("bus_stops")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
             $table->integer('merchant_id')->unsigned()->index('language_bus_stops_merchant');
             $table->foreign("merchant_id")->on("merchants")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");

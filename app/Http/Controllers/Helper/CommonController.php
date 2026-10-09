@@ -460,7 +460,7 @@ class CommonController extends Controller
     public function findGeofenceArea($lat, $long, $base_area_id, $merchant_id)
     {
         $geofenceAreas = CountryArea::with('RestrictedArea')->whereHas('RestrictedArea', function ($query) use ($base_area_id) {
-            $query->whereRaw(DB::raw("find_in_set($base_area_id,base_areas)"));
+            $query->whereRaw(DB::raw("$base_area_id = ANY(string_to_array(base_areas, ','))"));
         })->get();
         $checkGeofenceArea = [];
         if (!empty($geofenceAreas)) {

@@ -92,7 +92,7 @@ class CarpoolingRideDetail extends Model
                     'carpooling_rides.female_ride',
                     'carpooling_rides.ac_ride',
                     DB::raw('(6371 * ACOS(COS(RADIANS('.$pickupLatLng['lat'].')) * COS(RADIANS('.$latitude.')) * COS(RADIANS('.$longitude.') - RADIANS('.$pickupLatLng['lng'].')) + SIN(RADIANS('.$pickupLatLng['lat'].')) * SIN(RADIANS('.$latitude.')))) AS pickup_distance'),
-                    DB::raw('CONCAT(users.first_name, " ", users.last_name) AS full_name'),
+                    DB::raw("CONCAT(users.first_name, ' ', users.last_name) AS full_name"),
                     'carpooling_ride_details.is_return as return_ride'
                 )
                 ->join('carpooling_ride_details', 'carpooling_ride_details.carpooling_ride_id', '=', 'carpooling_rides.id')

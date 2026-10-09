@@ -18,22 +18,22 @@ return new class extends Migration
 
             $table->string('merchant_bus_booking_id')->nullable();
 
-            $table->unsignedInteger('merchant_id')->index('merchant_id');
+            $table->unsignedInteger('merchant_id')->index('bus_bookings_merchant_id');
             $table->foreign("merchant_id")->on("merchants")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
 
-            $table->unsignedInteger('user_id')->index('user_id');
+            $table->unsignedInteger('user_id')->index('bus_bookings_user_id');
             $table->foreign("user_id")->on("users")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
 
             $table->unsignedBigInteger('bus_booking_master_id')->index('bus_booking_master_id');
             $table->foreign("bus_booking_master_id")->on("bus_booking_masters")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
 
-            $table->unsignedInteger('country_area_id')->index('country_area_id')->nullable();
+            $table->unsignedInteger('country_area_id')->index('bus_bookings_country_area_id')->nullable();
             $table->foreign("country_area_id")->on("country_areas")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
 
-            $table->unsignedInteger('bus_stop_id')->index('bus_stop_id');
+            $table->unsignedInteger('bus_stop_id')->index('bus_bookings_bus_stop_id');
             $table->foreign("bus_stop_id")->on("bus_stops")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
 
-            $table->unsignedInteger('end_bus_stop_id')->index('end_bus_stop_id');
+            $table->unsignedInteger('end_bus_stop_id')->index('bus_bookings_end_bus_stop_id');
             $table->foreign("end_bus_stop_id")->on("bus_stops")->references("id")->onUpdate("RESTRICT")->onDelete("CASCADE");
 
             $table->unsignedBigInteger('pickup_point_id')->nullable();

@@ -25,6 +25,7 @@
         "php": "^8.1",
         "ext-gd": "*",
         "ext-soap": "*",
+        "ext-pdo_pgsql": "*",
         "africastalking/africastalking": "*",
         "aws/aws-sdk-php-laravel": "*",
         "barryvdh/laravel-dompdf": "*",

@@ -79,7 +79,9 @@ class CreateBusinessSegmentsTable extends Migration
                 $table->tinyInteger('delivery_service')->default(1)->comment('1:Merchant, 2:Own/Driver Agency');
                 $table->tinyInteger('dine_in')->nullable();
                 $table->integer('membership_plan_id')->unsigned();
-                $table->foreign('membership_plan_id')->references('id')->on('merchant_membership_plans')->onUpdate('RESTRICT')->onDelete('CASCADE');
+                // FK to merchant_membership_plans moved to the appended
+                // migration _2026_10_09_000001: that table is created later and
+                // PostgreSQL requires the referenced table to exist first.
                 $table->integer('order_based_on')->default(1)->comment('1:commison,2:subscription');
                 $table->integer('subscription_date_timestamp')->nullable();
                 $table->integer('subscription_expired')->nullable()->comment('1:EXPIRED , 2:NOT EXPIRED');

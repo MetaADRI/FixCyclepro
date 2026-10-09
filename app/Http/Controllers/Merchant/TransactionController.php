@@ -105,13 +105,13 @@ class TransactionController extends Controller
         if ($request->rider) {
             $keyword = $request->rider;
             $query->WhereHas('User', function ($q) use ($keyword) {
-                $q->where(\DB::raw("concat(`first_name`,' ', `last_name`)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
             });
         }
         if ($request->driver) {
             $keyword = $request->driver;
             $query->WhereHas('Driver', function ($q) use ($keyword) {
-                $q->where(\DB::raw("concat(`first_name`,' ', `last_name`)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw("concat(first_name, ' ', last_name)"), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
             });
         }
         $data = $request->all();
@@ -524,13 +524,13 @@ class TransactionController extends Controller
         if ($request->rider) {
             $keyword = $request->rider;
             $query->WhereHas('User', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`, `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw('concat(first_name, last_name)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
             });
         }
         if ($request->driver) {
             $keyword = $request->driver;
             $query->WhereHas('Driver', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`, `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw('concat(first_name, last_name)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
             });
         }
         $transactions = $query->paginate(25);
@@ -583,13 +583,13 @@ class TransactionController extends Controller
         if ($request->rider) {
             $keyword = $request->rider;
             $query->WhereHas('User', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`, `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw('concat(first_name, last_name)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('UserPhone', 'LIKE', "%$keyword%");
             });
         }
         if ($request->driver) {
             $keyword = $request->driver;
             $query->WhereHas('Driver', function ($q) use ($keyword) {
-                $q->where(\DB::raw('concat(`first_name`, `last_name`)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
+                $q->where(\DB::raw('concat(first_name, last_name)'), 'LIKE', "%$keyword%")->orWhere('email', 'LIKE', "%$keyword%")->orWhere('phoneNumber', 'LIKE', "%$keyword%");
             });
         }
         $transactions = $query->paginate(25);

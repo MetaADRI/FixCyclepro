@@ -583,7 +583,7 @@ class DriverBackup extends Authenticatable
                 ->addSelect('dsr.rating')
                 ->join('driver_segment as ds','drivers.id','=','ds.driver_id')
                 ->leftJoin('favourite_drivers as fd','drivers.id','=','fd.driver_id')
-                ->leftJoin(DB::raw('(SELECT dsr.driver_id, CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating FROM `driver_segment_ratings` as dsr GROUP BY dsr.driver_id) dsr'),'drivers.id','=','dsr.driver_id')
+                ->leftJoin(DB::raw('(SELECT dsr.driver_id, CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating FROM driver_segment_ratings as dsr GROUP BY dsr.driver_id) dsr'),'drivers.id','=','dsr.driver_id')
 
                 ->with(['ActiveAddress'=>function($q) use($radius,$latitude,$longitude,$distance)
                 {
@@ -683,7 +683,7 @@ class DriverBackup extends Authenticatable
         $driver = Driver::select('drivers.id','drivers.first_name','drivers.last_name','drivers.profile_image','drivers.created_at','fd.is_favourite')
             ->addSelect(DB::raw("CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating"),'dsr.driver_id')
             ->leftJoin('driver_segment_ratings as dsr','drivers.id','=','dsr.driver_id')
-            ->leftJoin(DB::raw('(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM `favourite_drivers` as fd where( segment_id="'.$segment_id.'" or segment_id IS NULL) GROUP BY fd.driver_id) fd'),'drivers.id','=','fd.driver_id')
+            ->leftJoin(DB::raw("(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM favourite_drivers as fd where( segment_id='$segment_id' or segment_id IS NULL) GROUP BY fd.driver_id) fd"),'drivers.id','=','fd.driver_id')
             ->with(['ServiceType.SegmentPriceCard'=>function($q) use($segment_id){
                     $q->addSelect('segment_price_cards.id','segment_price_cards.service_type_id','segment_price_cards.amount','segment_price_cards.price_type','segment_price_cards.driver_id');
                     $q->where('segment_price_cards.segment_id', $segment_id);
@@ -729,7 +729,7 @@ class DriverBackup extends Authenticatable
             ->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'))
 //            ->addSelect(DB::raw("CAST(AVG (dsr.rating) AS DECIMAL (2,1)) AS rating"),'dsr.driver_id')
 //            ->leftJoin('driver_segment_ratings as dsr','drivers.id','=','dsr.driver_id')
-            ->leftJoin(DB::raw('(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM `favourite_drivers` as fd where( segment_id="'.$segment_id.'" or segment_id IS NULL AND user_id="'.$user_id.'" or user_id IS NULL) GROUP BY fd.driver_id) fd'),'drivers.id','=','fd.driver_id')
+            ->leftJoin(DB::raw("(SELECT fd.driver_id, count(fd.driver_id) AS is_favourite FROM favourite_drivers as fd where( segment_id='$segment_id' or segment_id IS NULL AND user_id='$user_id' or user_id IS NULL) GROUP BY fd.driver_id) fd"),'drivers.id','=','fd.driver_id')
                ->whereHas('ServiceType', function ($q) use ($segment_id) {
                         $q->where('driver_service_type.segment_id', $segment_id);
                     })

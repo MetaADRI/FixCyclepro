@@ -15,7 +15,7 @@ class CreateBusinessSegmentOnesignalsTable extends Migration
     {
         Schema::create('business_segment_onesignals', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('business_segment_id')->unsigned()->index('business_segment_configurations_business_segment_id_foreign');
+            $table->integer('business_segment_id')->unsigned()->index('business_segment_onesignals_business_segment_id_foreign');
             $table->string('application_key')->nullable();
             $table->string('rest_key')->nullable();
             $table->string('channel_id')->nullable();

@@ -17,7 +17,7 @@ class CreateDriverSegmentTable extends Migration
             Schema::create('driver_segment', function (Blueprint $table) {
                 $table->integer('driver_id')->unsigned();
                 $table->foreign('driver_id')->references('id')->on('drivers')->onUpdate('RESTRICT')->onDelete('CASCADE');
-                $table->integer('segment_id')->unsigned()->index('segment_id_foreign');
+                $table->integer('segment_id')->unsigned()->index('driver_segment_segment_id_foreign');
                 $table->foreign('segment_id')->references('id')->on('segments')->onUpdate('RESTRICT')->onDelete('CASCADE');
             });
         }

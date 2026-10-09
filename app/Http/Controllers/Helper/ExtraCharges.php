@@ -19,7 +19,7 @@ class ExtraCharges
         //date_default_timezone_set($priceCard->CountryArea->timezone);
         // this is defined in price controller so commented from here
         $dayId = $this->getCurrentDay(date('l'));
-        $pricecards = ExtraCharge::where([['price_card_id', '=', $price_card_id], ['slot_status', '=', 1]])->whereRaw("FIND_IN_SET($dayId,slot_week_days)")->get()->toArray();
+        $pricecards = ExtraCharge::where([['price_card_id', '=', $price_card_id], ['slot_status', '=', 1]])->whereRaw("$dayId = ANY(string_to_array(slot_week_days, ','))")->get()->toArray();
         $pricecards_array = array();
         foreach ($pricecards as $key => $value)
         {
