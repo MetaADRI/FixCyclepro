@@ -5,10 +5,7 @@
 # [docker, elixir, go, image, node, python, ruby, rust, static] — `runtime: php`
 # is invalid and `envVarsFrom` does not exist. Both services therefore build
 # the Dockerfile in this repo, and shared config lives in an envVarGroup.
-#
-# TODO(Phase 3): add a Node build stage to the Dockerfile (Vite) and commit
-# package-lock.json — `npm run build` does not exist yet (package.json is
-# still laravel-mix 2), so asset building is deliberately NOT wired in here.
+# Asset building is wired into the Dockerfile's `assets` node stage.
 
 envVarGroups:
   - name: fixcycle-config

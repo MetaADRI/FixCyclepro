@@ -4,6 +4,17 @@
 # Requirements from composer.json: php ^8.1, ext-gd, ext-soap.
 # Port target (Neon/Postgres): ext-pdo_pgsql.
 
+# Layer 0: Vite asset build (Tailwind/Alpine resources/views wired via inputs).
+FROM node:20-bookworm-slim AS assets
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+COPY . .
+RUN npm run build
+
 FROM php:8.2-cli-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -45,6 +56,8 @@ RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist
 # .dockerignore excludes .env, vendor, storage contents and .git — the image
 # must never contain secrets; Render injects env vars at runtime.
 COPY . .
+# Vite build output (public/build is gitignored, produced by the assets stage).
+COPY --from=assets /app/public/build /var/www/html/public/build
 RUN mkdir -p \
         storage/app \
         storage/framework/cache \
