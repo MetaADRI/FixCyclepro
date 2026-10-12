@@ -1,0 +1,511 @@
+/*
+ * Admin panel responsive + visual refresh layer (Phase 4).
+ * Loaded AFTER theme/css/site.min.css. Purely presentational —
+ * must not change routes, permissions, or form actions.
+ *
+ * Design tokens from the Phase 3 customer PWA design system:
+ *   brand #E33A45 / #C92B36  accent #0EA5A4  surface #F6F7F9
+ *
+ * Theme breakpoints (global/vendor/breakpoints): xs 0-767, sm 768-991,
+ * md 992-1199, lg 1200+. The theme already hides/opens the sidebar at
+ * xs; this layer reinforces that drawer and adds the backdrop, plus
+ * responsive tables/forms and the visual refresh for all widths.
+ */
+
+:root {
+  --fx-brand: #e33a45;
+  --fx-brand-dark: #c92b36;
+  --fx-brand-deep: #a5222b;
+  --fx-accent: #0ea5a4;
+  --fx-surface: #f6f7f9;
+  --fx-ink: #0f172a;
+  --fx-ink-soft: #64748b;
+  --fx-border: rgba(15, 23, 42, 0.08);
+  --fx-radius: 10px;
+  --fx-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
+}
+
+body {
+  background-color: var(--fx-surface);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-feature-settings: "cv11", "ss01";
+}
+
+/* ------------------------------------------------------------------ *
+ * 1. Navbar — brand refresh & touch-friendly sizing
+ * ------------------------------------------------------------------ */
+
+.site-navbar.navbar-inverse.bg-indigo-600 {
+  background-color: transparent !important;
+  background-image: linear-gradient(90deg, var(--fx-brand-dark) 0%, var(--fx-brand) 55%, #e85a63 100%) !important;
+  border-bottom: 0;
+}
+
+.site-navbar.navbar-inverse.bg-indigo-600 .navbar-brand-text {
+  color: #fff;
+}
+
+.site-navbar .navbar-header .navbar-toggler {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* ------------------------------------------------------------------ *
+ * 2. Off-canvas drawer backdrop (phones; theme drives open/hide)
+ * ------------------------------------------------------------------ */
+
+.site-menubar-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1400;
+  background: rgba(15, 23, 42, 0.5);
+  display: none;
+}
+
+body.site-menubar-open .site-menubar-backdrop {
+  display: block;
+}
+
+.site-menubar {
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. Panels / cards — consistent radius, resting shadow, empty states
+ * ------------------------------------------------------------------ */
+
+.panel,
+.card {
+  border-radius: var(--fx-radius);
+}
+
+.panel {
+  box-shadow: var(--fx-shadow);
+}
+
+.panel-bordered > .panel-heading,
+.panel-heading:first-child {
+  border-radius: var(--fx-radius) var(--fx-radius) 0 0;
+}
+
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.panel-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.panel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Empty state (DataTables built-in message + reusable .panel-empty) */
+.dataTables_empty {
+  padding: 44px 16px !important;
+  color: var(--fx-ink-soft);
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+
+.panel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 44px 16px;
+  text-align: center;
+  color: var(--fx-ink-soft);
+}
+
+.panel-empty .panel-empty-icon {
+  font-size: 34px;
+  line-height: 1;
+  color: #cbd5e1;
+  margin-bottom: 10px;
+}
+
+.panel-empty .panel-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fx-ink);
+  margin-bottom: 4px;
+}
+
+/* Loading overlay utility */
+.admin-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(246, 247, 249, 0.85);
+}
+
+.admin-loading .admin-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid rgba(227, 58, 69, 0.2);
+  border-top-color: var(--fx-brand);
+  animation: fx-spin 0.8s linear infinite;
+}
+
+#myLoader {
+  z-index: 2000;
+}
+
+@keyframes fx-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ------------------------------------------------------------------ *
+ * 4. Sidebar menu — brand accent on hover / active / open
+ * ------------------------------------------------------------------ */
+
+.site-menu-item.active > a,
+.site-menu-item.open > a {
+  color: var(--fx-brand-deep);
+}
+
+.site-menu-item.active > a {
+  background-color: rgba(227, 58, 69, 0.08);
+  border-left-color: var(--fx-brand);
+}
+
+.site-menu-item.active > a .site-menu-icon,
+.site-menu-item.open > a .site-menu-icon {
+  color: var(--fx-brand);
+}
+
+.site-menu-item > a:hover {
+  background-color: rgba(227, 58, 69, 0.06);
+}
+
+.site-menu-item.active > a .site-menu-title,
+.site-menu-item.open > a .site-menu-title {
+  color: var(--fx-brand-deep);
+  font-weight: 600;
+}
+
+.site-menu-sub .site-menu-item.active > a {
+  background: transparent;
+  color: var(--fx-brand-deep);
+}
+
+/* ------------------------------------------------------------------ *
+ * 5. Primary buttons / links — brand refresh
+ * ------------------------------------------------------------------ */
+
+.btn-primary,
+.btn-primary.active,
+.btn-primary:focus,
+.btn-primary:hover {
+  background-color: var(--fx-brand);
+  border-color: var(--fx-brand);
+}
+
+.btn-primary:hover {
+  background-color: var(--fx-brand-dark);
+  border-color: var(--fx-brand-dark);
+}
+
+.btn.btn-primary:not(:disabled):not(.disabled):active,
+.btn.btn-primary:not(:disabled):not(.disabled).active {
+  background-color: var(--fx-brand-deep);
+  border-color: var(--fx-brand-deep);
+}
+
+.table a:not(.btn) {
+  color: var(--fx-brand-dark);
+}
+
+.table a:not(.btn):hover {
+  color: var(--fx-brand-deep);
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  color: var(--fx-brand-dark);
+}
+
+.nav-tabs .nav-link.active {
+  border-bottom-color: var(--fx-brand);
+}
+
+/* ------------------------------------------------------------------ *
+ * 6. Overflow guards (all widths) — never break the page layout
+ * ------------------------------------------------------------------ */
+
+.dataTables_wrapper,
+.table-responsive {
+  max-width: 100%;
+}
+
+.panel-body {
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * 7. Tablet / small desktop (max-width: 991.98px)
+ * ------------------------------------------------------------------ */
+
+@media (max-width: 991.98px) {
+  .page-content {
+    padding: 16px 12px 44px;
+  }
+
+  .page-header .page-title {
+    font-size: 21px;
+  }
+
+  .panel-body {
+    padding: 16px 14px;
+  }
+
+  .panel-body.container-fluid {
+    padding: 16px 14px;
+  }
+
+  /* Wide tables scroll inside their panel instead of the whole page */
+  .panel-body > .table,
+  .panel-body > table.table,
+  .panel-body > iframe {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dataTables_wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Touch friendly controls */
+  .btn,
+  .form-control,
+  .input-group-text,
+  .bootstrap-select .btn-light,
+  .select2-container .select2-selection--single {
+    min-height: 42px;
+  }
+
+  .btn {
+    border-radius: 8px;
+  }
+
+  .btn-sm {
+    min-height: 34px;
+    border-radius: 7px;
+  }
+
+  .dataTables_paginate .paginate_button {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px 6px;
+    margin: 0 1px;
+  }
+
+  .nav-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-tabs .nav-link {
+    white-space: nowrap;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Dropdowns / modals must never overflow the viewport */
+  .dropdown-menu {
+    max-width: 92vw;
+    overflow-x: auto;
+  }
+
+  .modal-dialog {
+    margin: 8px auto;
+    max-width: calc(100% - 16px);
+  }
+
+  .modal-dialog .modal-content {
+    border-radius: 12px;
+  }
+
+  .panel .ct-chart,
+  .panel .ct-chart-line,
+  .panel .chartist {
+    max-width: 100%;
+  }
+
+  .navbar-brand-center .navbar-brand-logo {
+    max-height: 32px;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 8. Phones (max-width: 767.98px) — off-canvas drawer (theme xs state)
+ * ------------------------------------------------------------------ */
+
+@media (max-width: 767.98px) {
+  /* Kill stray horizontal overflow from negative-margin utility wrappers
+     (e.g. dashboard `mr--10 ml--10`) and charts. */
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .mr--10,
+  .ml--10 {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  /* Stack form labels instead of right-aligning them off-screen */
+  .form-horizontal .control-label {
+    text-align: left !important;
+    padding-bottom: 4px;
+  }
+
+  /* Reinforce the theme's off-canvas drawer and cap its width */
+  .site-menubar {
+    width: 272px !important;
+    max-width: 86vw;
+    z-index: 1500;
+    box-shadow: 4px 0 18px rgba(15, 23, 42, 0.18);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translate3d(-100%, 0, 0) !important;
+    transform: translate3d(-100%, 0, 0) !important;
+  }
+
+  /* When open, lift the drawer above the backdrop and slide it in */
+  body.site-menubar-open .site-menubar {
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+  }
+
+  body.site-menubar-open {
+    overflow-x: hidden;
+  }
+
+  .page-content {
+    padding: 14px 10px 40px;
+  }
+
+  .page-header {
+    padding: 12px 10px;
+  }
+
+  .page-header .page-title {
+    font-size: 20px;
+  }
+
+  .panel,
+  .card {
+    margin-bottom: 16px;
+  }
+
+  .panel-body {
+    padding: 16px 14px;
+  }
+
+  .dataTable {
+    min-width: 480px;
+  }
+
+  .info-panel {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .info-panel .card-block {
+    padding: 14px 12px !important;
+  }
+
+  .panel-title {
+    font-size: 16px;
+  }
+
+  .font-size-18 {
+    font-size: 16px;
+  }
+
+  .font-size-24,
+  .font-size-26 {
+    font-size: 20px;
+  }
+
+  .font-size-30,
+  .font-size-32 {
+    font-size: 24px;
+  }
+
+  .label.badge,
+  .badge {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 9. Very small screens (max-width: 479.98px)
+ * ------------------------------------------------------------------ */
+
+@media (max-width: 479.98px) {
+  body {
+    font-size: 14px;
+  }
+
+  .page-content {
+    padding: 12px 6px 36px;
+  }
+
+  .panel-heading {
+    padding: 14px 12px;
+  }
+
+  .panel-actions {
+    margin-top: 4px;
+  }
+
+  .dt-buttons .btn {
+    min-width: 40px;
+    padding: 8px 10px;
+  }
+
+  /* Keep inline forms from overflowing on 320-380px screens */
+  .form-inline .form-control {
+    width: 100%;
+    margin-bottom: 6px;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 10. Reduced motion
+ * ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .site-menubar,
+  .site-menubar-backdrop,
+  .admin-loading .admin-loading-spinner {
+    transition: none;
+    animation: none;
+  }
+}

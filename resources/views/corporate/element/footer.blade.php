@@ -132,6 +132,7 @@
         });
     })(document, window, jQuery);
     </script>
+@include('shared.admin.menubar-mobile-script')
 </body>
 @yield('js')
 </html>

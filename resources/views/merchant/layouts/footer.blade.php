@@ -486,6 +486,7 @@
     });
   });
 </script>
+@include('shared.admin.menubar-mobile-script')
 @yield('js')
 </body>
 </html>

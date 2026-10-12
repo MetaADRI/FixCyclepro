@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui">
     <meta name="description" content="bootstrap admin template">
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{{ asset('global/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('global/css/bootstrap-extend.min.css') }}">
     <link rel="stylesheet" href="{{ asset('theme/css/site.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/css/admin-responsive.css') }}">
 
     <!-- Plugins -->
     <link rel="stylesheet" href="{{ asset('global/vendor/animsition/animsition.css') }}">
