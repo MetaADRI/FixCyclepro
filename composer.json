@@ -71,8 +71,8 @@
         "fakerphp/faker": "*",
         "filp/whoops": "*",
         "mockery/mockery": "*",
-        "nunomaduro/collision": "*",
-        "phpunit/phpunit": "*"
+        "nunomaduro/collision": "^6.0",
+        "phpunit/phpunit": "^9.6"
     },
     "autoload": {
         "classmap": [

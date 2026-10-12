@@ -73,12 +73,12 @@ return [
             'driver' => 'errorlog',
             'level' => 'debug',
         ],
-        //        'expections' => [
-        //            'driver' => 'daily',
-        //            'path' => storage_path('logs/error.log'),
-        //            'level' => 'debug',
-        //            'days' => 3,
-        //        ],
+        'expections' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/error.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
         'onesignal' => [
             'driver' => 'daily',
             'path' => storage_path('logs/onesignal.log'),
