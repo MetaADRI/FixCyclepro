@@ -182,8 +182,10 @@ return [
         App\Providers\ComposerServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        App\Providers\TelescopeServiceProvider::class,
-        Barryvdh\Debugbar\ServiceProvider::class,
+        // Telescope + Debugbar are debug-only tooling registered conditionally
+        // in App\Providers\AppServiceProvider::register(). Keeping them out of
+        // this list prevents a missing-class boot failure in production, where
+        // barryvdh/laravel-debugbar is not installed (composer --no-dev).
     ],
 
     /*

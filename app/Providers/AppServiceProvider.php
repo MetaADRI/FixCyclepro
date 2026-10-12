@@ -48,6 +48,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // Debug-only tooling, registered behind explicit flags instead of
+        // unconditionally in config/app.php. In production
+        // (composer install --no-dev) barryvdh/laravel-debugbar is absent, so
+        // referencing its provider unconditionally would abort boot.
+        if (config('telescope.enabled') && class_exists(\App\Providers\TelescopeServiceProvider::class)) {
+            $this->app->register(\App\Providers\TelescopeServiceProvider::class);
+        }
+
+        if (config('debugbar.enabled') && class_exists(\Barryvdh\Debugbar\ServiceProvider::class)) {
+            $this->app->register(\Barryvdh\Debugbar\ServiceProvider::class);
+        }
     }
 }

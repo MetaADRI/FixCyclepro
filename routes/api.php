@@ -2,11 +2,9 @@
 
 use Illuminate\Http\Request;
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: *');
-//header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Credentials, Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Allow-Headers, aliasName, publicKey, secretKey, locale');
+// CORS is handled by Illuminate\Http\Middleware\HandleCors (registered in
+// app/Http/Kernel.php) and configured in config/cors.php. The previous
+// hardcoded wildcard header() calls were removed in the security phase.
 
 
 //sms testing route
@@ -850,24 +848,24 @@ Route::prefix('user')->group(function () {
 
         // Login OLD Version
         Route::post('/demoUser', ['as' => 'user.api.demoUser', 'uses' => 'Account\UserController@DemoUser']);
-        Route::post('/login', ['as' => 'api.user-login', 'uses' => 'Account\UserController@Login']);
-        Route::post('/login/otp', ['as' => 'api.user-login-otp', 'uses' => 'Account\UserController@loginOtp']);
-        Route::post('/signup', ['as' => 'api.user.signup', 'uses' => 'Account\UserController@SignUp']);
-        Route::post('/socialsingup', ['as' => 'api.user-socialsingup', 'uses' => 'Account\UserController@SocialSignup']);
-        Route::post('/socialsignin', ['as' => 'api.user-socialsignin', 'uses' => 'Account\UserController@SocialSign']);
+        Route::post('/login', ['as' => 'api.user-login', 'uses' => 'Account\UserController@Login'])->middleware('throttle:30,1');
+        Route::post('/login/otp', ['as' => 'api.user-login-otp', 'uses' => 'Account\UserController@loginOtp'])->middleware('throttle:30,1');
+        Route::post('/signup', ['as' => 'api.user.signup', 'uses' => 'Account\UserController@SignUp'])->middleware('throttle:30,1');
+        Route::post('/socialsingup', ['as' => 'api.user-socialsingup', 'uses' => 'Account\UserController@SocialSignup'])->middleware('throttle:30,1');
+        Route::post('/socialsignin', ['as' => 'api.user-socialsignin', 'uses' => 'Account\UserController@SocialSign'])->middleware('throttle:30,1');
 
         // Login New Version
         Route::post('/demo-onboard', ['as' => 'user.api.demoUser', 'uses' => 'Account\UserController@DemoUser']);
-        Route::post('/on-board', ['as' => 'api.user-login', 'uses' => 'Account\UserController@Login']);
-        Route::post('/on-board/otp', ['as' => 'api.user-login-otp', 'uses' => 'Account\UserController@loginOtp']);
-        Route::post('/normal-reg', ['as' => 'api.user.signup', 'uses' => 'Account\UserController@SignUp']);
-        Route::post('/social-reg', ['as' => 'api.user-socialsingup', 'uses' => 'Account\UserController@SocialSignup']);
-        Route::post('/social-on-board', ['as' => 'api.user-socialsignin', 'uses' => 'Account\UserController@SocialSign']);
+        Route::post('/on-board', ['as' => 'api.user-login', 'uses' => 'Account\UserController@Login'])->middleware('throttle:30,1');
+        Route::post('/on-board/otp', ['as' => 'api.user-login-otp', 'uses' => 'Account\UserController@loginOtp'])->middleware('throttle:30,1');
+        Route::post('/normal-reg', ['as' => 'api.user.signup', 'uses' => 'Account\UserController@SignUp'])->middleware('throttle:30,1');
+        Route::post('/social-reg', ['as' => 'api.user-socialsingup', 'uses' => 'Account\UserController@SocialSignup'])->middleware('throttle:30,1');
+        Route::post('/social-on-board', ['as' => 'api.user-socialsignin', 'uses' => 'Account\UserController@SocialSign'])->middleware('throttle:30,1');
 
         Route::post('/validate-data', 'Api\UserController@SignupValidation');
 
         Route::post('/check-user-available', ['as' => 'api.user.check-user', 'uses' => 'Account\UserController@CheckUserForQuesAns']);
-        Route::post('/forgotpassword', ['as' => 'api.user.password', 'uses' => 'Account\UserController@ForgotPassword']);
+        Route::post('/forgotpassword', ['as' => 'api.user.password', 'uses' => 'Account\UserController@ForgotPassword'])->middleware('throttle:30,1');
         Route::post('/details', 'Account\UserController@Details');
         Route::post('/edit-profile', 'Account\UserController@EditProfile');
 
@@ -876,7 +874,7 @@ Route::prefix('user')->group(function () {
 
         Route::post('/on-board/otp-validate', ['as' => 'api.user-login-new-otp', 'uses' => 'Account\UserController@validateOtp']);
 
-        Route::post('/guest/login', ['as' => 'api.user.guest.login', 'uses' => 'Account\UserController@guestLogin']);
+        Route::post('/guest/login', ['as' => 'api.user.guest.login', 'uses' => 'Account\UserController@guestLogin'])->middleware('throttle:30,1');
         Route::post("/in-app-call", ['as' => 'api.user.in_app_call', 'uses' => 'Api\CommonController@inAppCalling']);
 
         //chat platform booking
@@ -1478,7 +1476,7 @@ Route::prefix('driver')->group(function () {
 
         Route::post('/bank-details/save', ['as' => 'driver.bankdetails', 'uses' => 'Api\DriverController@BankDetailsSave']);
         // driver login
-        Route::post('/on-board', ['as' => 'api.driver-login', 'uses' => 'Api\DriverController@Login']);
+        Route::post('/on-board', ['as' => 'api.driver-login', 'uses' => 'Api\DriverController@Login'])->middleware('throttle:30,1');
         Route::post('/profile', ['as' => 'api.driver-login', 'uses' => 'Api\DriverController@driverBasicDetails']);
 
         Route::post('/get-stripe-connect-required-details', 'Account\DriverController@getStripeConnectRequireDetails');
@@ -1498,7 +1496,7 @@ Route::prefix('driver')->group(function () {
         Route::post('/vehicledocumentlist', 'Api\DriverController@VehicleDocumentList');
         //        Route::post('/firtstep', ['as' => 'api.driver.signup-firstStep', 'uses' => 'Api\DriverController@BasicInformation']);
         //        Route::post('/login', ['as' => 'api.driver-login', 'uses' => 'Api\DriverController@Login']);
-        Route::post('/login/otp', ['as' => 'api.driver-login-otp', 'uses' => 'Api\DriverController@LoginOtp']);
+        Route::post('/login/otp', ['as' => 'api.driver-login-otp', 'uses' => 'Api\DriverController@LoginOtp'])->middleware('throttle:30,1');
         Route::post('/vehicle-configuration', ['as' => 'api.driver-vehicle-config', 'uses' => 'Api\DriverVehicleController@vehicleConfiguration']);
         Route::post('/vehicle-model', ['as' => 'api.driver-vehicle-model', 'uses' => 'Api\DriverVehicleController@getVehicleModel']);
         Route::post('/add-vehicle', ['as' => 'api.driver-add-vehicle', 'uses' => 'Api\DriverVehicleController@addVehicle']);
@@ -1513,7 +1511,7 @@ Route::prefix('driver')->group(function () {
         });
 
         Route::post('/check-driver-available', ['as' => 'api.user.check-driver', 'uses' => 'Api\DriverController@CheckDriverForQuesAns']);
-        Route::post('/forgotpassword', ['as' => 'api.driver.password', 'uses' => 'Api\DriverController@ForgotPassword']);
+        Route::post('/forgotpassword', ['as' => 'api.driver.password', 'uses' => 'Api\DriverController@ForgotPassword'])->middleware('throttle:30,1');
         Route::post('/cms/pages', 'Api\CommonController@DriverCmsPage');
         //        Route::post('/demo', ['as' => 'driver.api.demoUser', 'uses' => 'Api\DriverController@Demo']);
         Route::post('/edit-profile', 'Api\DriverController@editProfile');

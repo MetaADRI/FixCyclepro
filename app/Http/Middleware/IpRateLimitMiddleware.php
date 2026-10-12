@@ -23,9 +23,11 @@ class IpRateLimitMiddleware
         // Define the rate limit key based on the user's IP address
         $key = 'ip:' . $request->ip();
 
-        // Define the maximum number of requests and the time period (in seconds)
-        $maxRequests = 2; // Adjust as needed
-        $decayMinutes = 60; // Adjust as needed
+        // Define the maximum number of requests and the time period (in seconds).
+        // Tunable via env so operators can relax the anti-abuse limit for
+        // carrier-NAT mobile clients without a code change.
+        $maxRequests = (int) env('LIMIT_API_MAX', 2); // Adjust as needed
+        $decayMinutes = (int) env('LIMIT_API_DECAY', 60); // Adjust as needed
 
         // Check if the user has exceeded the rate limit
         if ($this->limiter->tooManyAttempts($key, $maxRequests, $decayMinutes)) {

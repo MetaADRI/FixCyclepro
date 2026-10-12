@@ -16,12 +16,12 @@ trait MailTrait
     {
         if (empty($configuration)) {
             $default_config = (object)array(
-                'host' => 'email-smtp.eu-west-2.amazonaws.com',
-                'sender' => 'no-reply@mailer.apporio.com',
-                'username' => '***REMOVED***',
-                'password' => 'BNvaIzlzh6huSeRnKqWhp2MogsuBAFUNTNQXL20R3dtJ',
-                'encryption' => 'tls',
-                'port' => 587,
+                'host' => env('MAIL_HOST', 'email-smtp.eu-west-2.amazonaws.com'),
+                'sender' => env('MAIL_FROM_ADDRESS', 'no-reply@mailer.apporio.com'),
+                'username' => env('MAIL_USERNAME', env('SES_KEY')),
+                'password' => env('MAIL_PASSWORD', env('SES_SECRET')),
+                'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+                'port' => env('MAIL_PORT', 587),
                 'slug' => 'PHP_MAILER',
                 'api_key' => '',
             );

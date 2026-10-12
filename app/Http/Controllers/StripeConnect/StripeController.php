@@ -77,7 +77,6 @@ class StripeController extends Controller
                 $res = $result['result'];
                 $card = $result['card'];
                 self::set_api_key($driver->merchant_id);
-                // \Stripe\Stripe::setApiKey('***REMOVED***');
                 $account = Account::retrieve($request->sc_account_id);
                 foreach ($account->external_accounts->data as $source) {
                     if ($source->object === 'card' && $source->id !== $card->id) {

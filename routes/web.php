@@ -1486,10 +1486,10 @@ Route::prefix('merchant/admin')->group(function () {
     });
 });
 /* ===========================================================
-   PHASE 3 — CUSTOMER-FACING PWA
+   PHASE 3 ï¿½ CUSTOMER-FACING PWA
    Heavy lifting is done client-side against the existing
    /api/user/* endpoints (Passport bearer token, requested_from=web).
-   Pages are thin shells that reuse the same API controllers — no
+   Pages are thin shells that reuse the same API controllers ï¿½ no
    business logic is forked here.
    =========================================================== */
 
@@ -1499,15 +1499,15 @@ Route::get('/', function () {
 
 Route::get('/login', function () {
     return view('web.login');
-})->name('web.login');
+})->name('web.login')->middleware('throttle:30,1');
 
 Route::get('/signup', function () {
     return view('web.signup');
-})->name('web.signup');
+})->name('web.signup')->middleware('throttle:30,1');
 
 Route::get('/otp', function () {
     return view('web.otp');
-})->name('web.otp');
+})->name('web.otp')->middleware('throttle:30,1');
 
 Route::get('/app', function () {
     return view('web.app.home');
