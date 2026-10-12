@@ -1,0 +1,1 @@
+<div class="toast opacity-0" role="status" aria-live="polite"></div>

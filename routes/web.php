@@ -1485,3 +1485,70 @@ Route::prefix('merchant/admin')->group(function () {
 
     });
 });
+/* ===========================================================
+   PHASE 3 — CUSTOMER-FACING PWA
+   Heavy lifting is done client-side against the existing
+   /api/user/* endpoints (Passport bearer token, requested_from=web).
+   Pages are thin shells that reuse the same API controllers — no
+   business logic is forked here.
+   =========================================================== */
+
+Route::get('/', function () {
+    return view('web.landing');
+})->name('web.landing');
+
+Route::get('/login', function () {
+    return view('web.login');
+})->name('web.login');
+
+Route::get('/signup', function () {
+    return view('web.signup');
+})->name('web.signup');
+
+Route::get('/otp', function () {
+    return view('web.otp');
+})->name('web.otp');
+
+Route::get('/app', function () {
+    return view('web.app.home');
+})->name('web.home');
+
+Route::get('/app/booking/new', function () {
+    return view('web.app.booking-new');
+})->name('web.booking.new');
+
+Route::get('/app/booking/active', function () {
+    return view('web.app.booking-active');
+})->name('web.booking.active');
+
+Route::get('/app/booking/active/{booking}', function ($booking) {
+    return view('web.app.booking-active', ['booking' => $booking]);
+})->name('web.booking.active.with');
+
+Route::get('/app/bookings', function () {
+    return view('web.app.bookings');
+})->name('web.bookings');
+
+Route::get('/app/bookings/{booking}', function ($booking) {
+    return view('web.app.booking-detail', ['booking' => $booking]);
+})->name('web.booking.detail');
+
+Route::get('/app/wallet', function () {
+    return view('web.app.wallet');
+})->name('web.wallet');
+
+Route::get('/app/profile', function () {
+    return view('web.app.profile');
+})->name('web.profile');
+
+Route::get('/app/support', function () {
+    return view('web.app.support');
+})->name('web.support');
+
+Route::get('/app/support/{slug}', function ($slug) {
+    return view('web.app.support-page', ['slug' => $slug]);
+})->name('web.support.page');
+
+Route::get('/offline', function () {
+    return view('web.offline');
+})->name('web.offline');
