@@ -61,7 +61,7 @@ class PayPhoneController extends Controller
                 CURLOPT_CUSTOMREQUEST => 'GET',
                 CURLOPT_HTTPHEADER => array(
                     'Authorization: Bearer '.$token,
-                    'Cookie: ARRAffinity=***REMOVED***; ARRAffinitySameSite=***REMOVED***'
+                    'Cookie: ARRAffinity='.env('PAYPHONE_ARRAFFINITY_COOKIE').'; ARRAffinitySameSite='.env('PAYPHONE_ARRAFFINITY_COOKIE')
                 ),
             ));
             $response = curl_exec($curl);
@@ -90,7 +90,7 @@ class PayPhoneController extends Controller
                 CURLOPT_CUSTOMREQUEST => 'GET',
                 CURLOPT_HTTPHEADER => array(
                     'Authorization: Bearer '.$token,
-                    'Cookie: ARRAffinity=***REMOVED***; ARRAffinitySameSite=***REMOVED***',
+                    'Cookie: ARRAffinity='.env('PAYPHONE_ARRAFFINITY_COOKIE').'; ARRAffinitySameSite='.env('PAYPHONE_ARRAFFINITY_COOKIE'),
                     'Accept-Language: '.$locale,
                 ),
             ));
@@ -248,7 +248,7 @@ class PayPhoneController extends Controller
                 CURLOPT_HTTPHEADER => array(
                     'Authorization: Bearer '.$token,
                     'Content-Type: application/json',
-                    'Cookie: ARRAffinity=***REMOVED***; ARRAffinitySameSite=***REMOVED***',
+                    'Cookie: ARRAffinity='.env('PAYPHONE_ARRAFFINITY_COOKIE').'; ARRAffinitySameSite='.env('PAYPHONE_ARRAFFINITY_COOKIE'),
                     'Accept-Language: '.$locale,
                 ),
             ));

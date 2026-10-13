@@ -21,7 +21,7 @@ class PayGoController extends Controller
         // query url
         $this->query_url_uat = 'https://dss-gw-loadbal-uat01.digitalpaygo.com:9906/ServiceLayer/transaction/query';
         // password
-        $this->api_secret_key_uat = "***REMOVED***";
+        $this->api_secret_key_uat = env('PAYGO_API_SECRET_KEY_UAT');
         // user name
         $this->api_public_key_uat = "Ivenpro";
         // client id

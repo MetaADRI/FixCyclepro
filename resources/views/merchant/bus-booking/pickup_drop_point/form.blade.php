@@ -95,7 +95,7 @@
                             <input id="searchInput" class="input-controls" type="text" placeholder="@lang(" $string_file.enter_address")">
                             <div class="map" id="map" style="width: 100%; height: 300px;"></div>
                         </div>
-                        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&key=***REMOVED***"></script>
+                        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&key=<?= get_merchant_google_key(NULL, 'admin_backend'); ?>"></script>
                     </div>
                     <div class="form-actions float-right">
                         @if($id == NULL || $edit_permission)

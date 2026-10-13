@@ -33,10 +33,10 @@ class WaslController extends Controller
            CURLOPT_CUSTOMREQUEST => 'POST',
            CURLOPT_POSTFIELDS =>'{
                     "driver": {
-                    "identityNumber": "1119246377",
+                    "identityNumber": "",
                     "dateOfBirthHijri": "1423/12/02",
-                    "emailAddress": "***REMOVED***",
-                    "mobileNumber": "***REMOVED***"
+                    "emailAddress": "",
+                    "mobileNumber": ""
                     },
                     "vehicle": { 
                     "sequenceNumber": "383771810",
@@ -49,10 +49,10 @@ class WaslController extends Controller
                     }',
            CURLOPT_HTTPHEADER => array(
                'Content-Type: application/json',
-               'client-id: ***REMOVED***',
-               'app-id: ***REMOVED***',
-               'app-key: ***REMOVED***',
-               'Cookie: ***REMOVED***; NSC_Q-PDQ-3tdbmf_qspevdujpo-TTM=***REMOVED***; TS0131994e=***REMOVED***'
+               'client-id: '.env('WASL_CLIENT_ID'),
+               'app-id: '.env('WASL_APP_ID'),
+               'app-key: '.env('WASL_APP_KEY'),
+               'Cookie: '.env('WASL_COOKIE')
            ),
        ));
 

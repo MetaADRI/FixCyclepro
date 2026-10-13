@@ -246,7 +246,7 @@ class OneVisionController extends Controller
             );
             \Log::channel('one_vision')->emergency($response);
 
-            $secret_key = '***REMOVED***'; // shop password
+            $secret_key = env('ONEVISION_SECRET_KEY'); // shop password
 
             $data = $request->data;
             $resp_sign = $request->sign;

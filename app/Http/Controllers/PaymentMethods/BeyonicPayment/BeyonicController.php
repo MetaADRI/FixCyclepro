@@ -31,10 +31,8 @@ class BeyonicController extends Controller
     {
         // uat details
         // request url
-        $this->api_secret_key = '***REMOVED***';
-        // login details
-        // https://payments.beyonic.com/users/login/
-        // ***REMOVED***
+        $this->api_secret_key = env('BEYONIC_API_SECRET_KEY');
+        // login details: see https://payments.beyonic.com/users/login/
 
     }
 

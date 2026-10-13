@@ -18,7 +18,7 @@ class UserSingleBookingHistoryDetailResource extends JsonResource
                 'holder_map_image' =>[
                         'visibility' => true,
                         'data' =>[
-                                'map_image' => 'https:maps.googleapis.com/maps/api/staticmap?center=&maptype=roadmap&path=color:0x000000%7Cweight:10%7Cenc:ifllDwsfuMArADf@`@fDFlABRnFgAnFiAdMaC`AKxQiDzMyB`@I@R?f@DhAGbCCjBPfNLdG|@rRX|G_@KaA?{CAm@?M@EDAJ@rAGFKB_F@&markers=color:green%7Clabel:P%7C28.412160104253168,77.04396016895771&markers=color:red%7Clabel:D%7C28.403537721034702,77.03378152102232&key=***REMOVED***',
+                                'map_image' => 'https:maps.googleapis.com/maps/api/staticmap?center=&maptype=roadmap&path=color:0x000000%7Cweight:10%7Cenc:ifllDwsfuMArADf@`@fDFlABRnFgAnFiAdMaC`AKxQiDzMyB`@I@R?f@DhAGbCCjBPfNLdG|@rRX|G_@KaA?{CAm@?M@EDAJ@rAGFKB_F@&markers=color:green%7Clabel:P%7C28.412160104253168,77.04396016895771&markers=color:red%7Clabel:D%7C28.403537721034702,77.03378152102232&key=' . get_merchant_google_key(NULL, 'admin_backend'),
                             ],
                         ],
                 'holder_family_member' => [

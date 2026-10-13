@@ -1290,7 +1290,7 @@ class CommonController extends Controller
                             "IQ_Company_Number" => $wareUniqueId,
                             "IQ_Terminal_Number" => 8091,
                             "IQ_User_Number" => 8091,
-                            "IQ_User_Password" => "***REMOVED***",
+                            "IQ_User_Password" => env('IQ_USER_PASSWORD'),
                             "IQ_Partner_Passphrase"=>"",
                             "IQ_Submit_Data" => [
                                 "iq_root_json" => [

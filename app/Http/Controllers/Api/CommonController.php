@@ -1173,7 +1173,7 @@ class CommonController extends Controller
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_POSTFIELDS => "{\r\n    \"client_id\": \"$paymentConfig->auth_token\"\r\n}",
             CURLOPT_HTTPHEADER => array(
-                "authorization: HMAC $paymentConfig->api_public_key:***REMOVED***",
+                "authorization: HMAC $paymentConfig->api_public_key:" . env('KORBA_HMAC_SECRET'),
                 "cache-control: no-cache",
                 "content-type: application/json",
                 "postman-token: 72da0f74-9b01-46d9-97d6-2edef4867c7d"

@@ -147,7 +147,7 @@
     @include('merchant.shared.info-setting',['info_setting'=>$info_setting,'page_name'=>'add_text'])
 @endsection
 @section('js')
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&key=***REMOVED***"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&key=<?= get_merchant_google_key(NULL, 'admin_backend'); ?>"></script>
     <script type="text/javascript">
 
         // $(document).ready(function(){

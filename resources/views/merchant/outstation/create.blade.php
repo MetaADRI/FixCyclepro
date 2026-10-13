@@ -115,7 +115,7 @@
 @endsection
 @section('js')
     <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=***REMOVED***&libraries=places,drawing"></script>
+            src="https://maps.googleapis.com/maps/api/js?key=<?= get_merchant_google_key(NULL, 'admin_backend'); ?>&libraries=places,drawing"></script>
     <script>
         var map;
         var polygonArray = [];

@@ -1551,7 +1551,7 @@ class RandomPaymentController extends Controller
 
                 $time = date('YmdHis');
                 $shortCode = 4101899;
-                $passkey = '***REMOVED***';
+                $passkey = env('MPESA_PASSKEY');
                 $password  = \base64_encode($shortCode . $passkey . $time);
                 $response = $mpesa->STKPush([
                     'BusinessShortCode' => $shortCode,
@@ -3058,7 +3058,7 @@ class RandomPaymentController extends Controller
                 );
                 $token = '';
                 $mid = "104104000000329"; //Get MerchantID when opening account with 2C2P
-                $secret_key = "***REMOVED***"; //Get SecretKey from 2C2P PGW dashboard
+                $secret_key = env('TWOCTWOP_SECRET_KEY'); //Get SecretKey from 2C2P PGW dashboard
                 $desc = "Taxi Payment";
                 $amount = str_pad($request->amount, 12, '0', STR_PAD_LEFT);
                 $invoice_no = $request->order_id;
@@ -3087,7 +3087,7 @@ class RandomPaymentController extends Controller
             ]);
         try {
             $mid = "104104000000329"; //Get MerchantID when opening account with 2C2P
-            $secret_key = "***REMOVED***"; //Get SecretKey from 2C2P PGW dashboard
+            $secret_key = env('TWOCTWOP_SECRET_KEY'); //Get SecretKey from 2C2P PGW dashboard
             $tokenGenerate = new TwoCTwoPPaymentGateway($mid, $secret_key);
             $payment_status = $tokenGenerate->checkPaymentStatus($request);
             if (isset($payment_status['result']) && $payment_status['result'] == 1) {

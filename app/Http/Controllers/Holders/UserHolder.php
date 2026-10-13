@@ -102,7 +102,7 @@ class UserHolder
         return array(
             "Locationtype" => $catName,
             "location_type_color" => "#F5A623",
-            "image" => "https://maps.googleapis.com/maps/api/staticmap?center={$value->latitude},{$value->longitude}&zoom=15&size=300x200&key=***REMOVED***&markers=color:green%7Clabel:G%7C24.860734290733696,67.00113628059624",
+            "image" => "https://maps.googleapis.com/maps/api/staticmap?center={$value->latitude},{$value->longitude}&zoom=15&size=300x200&key=" . get_merchant_google_key(NULL, 'admin_backend') . "&markers=color:green%7Clabel:G%7C24.860734290733696,67.00113628059624",
             "name" => $value->location,
             "location_type_image" => ""
         );

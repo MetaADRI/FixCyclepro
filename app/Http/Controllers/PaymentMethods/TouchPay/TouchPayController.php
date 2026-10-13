@@ -29,8 +29,8 @@ class TouchPayController extends Controller
             $passwordAgent = $payment_option_config->api_secret_key; // Private access token
             $loginAgent = $payment_option_config->api_public_key; // public access token
             $serviceCode = $payment_option_config->auth_token; // public access token
-            $user_name = '***REMOVED***';
-            $password = '***REMOVED***';
+            $user_name = env('TOUCHPAY_USER_NAME');
+            $password = env('TOUCHPAY_PASSWORD');
             if($payment_option_config->gateway_condition == 1)
             {
                 $passwordAgent = $payment_option_config->api_secret_key; // Private access token

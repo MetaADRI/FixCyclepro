@@ -150,7 +150,7 @@ class DriverHolder
             'lat' => $value->current_latitude,
             'long' => $value->current_longitude,
             'text_address' => '----',
-            "current_status_image" => "https://maps.googleapis.com/maps/api/staticmap?center={$value->current_latitude},{$value->current_longitude}&zoom=15&size=400x200&key=***REMOVED***&markers=color:green%7Clabel:G%7C28.592140,77.046051",
+            "current_status_image" => "https://maps.googleapis.com/maps/api/staticmap?center={$value->current_latitude},{$value->current_longitude}&zoom=15&size=400x200&key=" . get_merchant_google_key(NULL, 'admin_backend') . "&markers=color:green%7Clabel:G%7C28.592140,77.046051",
             "background_color" => "#FFEDEC"
         );
     }

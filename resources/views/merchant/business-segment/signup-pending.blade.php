@@ -484,7 +484,7 @@
                             <div class="map" id="map" style="width: 100%; height: 300px;"></div>
                         </div>
                         <script type="text/javascript"
-                                src="https://maps.googleapis.com/maps/api/js?libraries=places&key=***REMOVED***"></script>
+                                src="https://maps.googleapis.com/maps/api/js?libraries=places&key=<?= get_merchant_google_key(NULL, 'admin_backend'); ?>"></script>
                         {{--                        @endif--}}
                     </div>
                     <hr>
