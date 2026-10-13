@@ -24,7 +24,7 @@
                     <div class="card">
                         <p class="text-xs uppercase tracking-wide text-slate-400">Wallet</p>
                         <p class="mt-1 text-xl font-extrabold brand-text"
-                           x-text="user.wallet_balance !== null && user.wallet_balance !== undefined ? user.wallet_balance : '—'"></p>
+                           x-text="user.wallet_balance !== null && user.wallet_balance !== undefined ? money(user.wallet_balance) : '—'"></p>
                     </div>
                     <div class="card">
                         <p class="text-xs uppercase tracking-wide text-slate-400">Country</p>

@@ -181,7 +181,7 @@
                         <div x-show="estimate" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
                             <div class="flex items-center justify-between">
                                 <p class="text-sm text-slate-500">Estimated fare</p>
-                                <p class="text-xl font-extrabold brand-text" x-text="(estimate && estimate.bill ? estimate.bill : 0)"></p>
+                                <p class="text-xl font-extrabold brand-text" x-text="money(estimate && estimate.bill ? estimate.bill : 0)"></p>
                             </div>
 
                             <div class="mt-4">

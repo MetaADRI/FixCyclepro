@@ -27,7 +27,7 @@
                     </div>
                     <div x-show="booking.estimate_bill" class="rounded-2xl border border-slate-200 p-4 text-center dark:border-slate-700">
                         <p class="text-xs uppercase tracking-wide text-slate-400">Estimated fare</p>
-                        <p class="mt-1 text-2xl font-extrabold brand-text" x-text="booking.estimate_bill"></p>
+                        <p class="mt-1 text-2xl font-extrabold brand-text" x-text="money(booking.estimate_bill)"></p>
                     </div>
                     <div x-show="booking.pickup_location" class="flex items-start gap-3">
                         <svg class="mt-0.5 h-5 w-5 shrink-0 brand-text" aria-hidden="true"><use href="#i-pin"/></svg>

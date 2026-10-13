@@ -1,6 +1,16 @@
 import 'leaflet/dist/leaflet.css';
 import Alpine from 'alpinejs';
-import api, { isLoggedIn, cachedUser, storeUser, clearSession, fetchUser } from './api';
+import api, {
+    isLoggedIn,
+    cachedUser,
+    storeUser,
+    clearSession,
+    fetchUser,
+    currency,
+    currencySymbol,
+    money,
+} from './api';
+import { staticCountries, flagEmoji } from './countries';
 import { createMap, makePin, reverseGeocode, searchPlaces } from './map';
 import createBookingTracker from './booking-tracker';
 
@@ -35,6 +45,15 @@ function fmt(num) {
     return Number.isNaN(n) ? String(num) : n.toFixed(2);
 }
 
+function fmtMoney(num) {
+    return money(num);
+}
+
+window.fmtMoney = fmtMoney;
+window.money = money;
+window.currency = currency;
+window.currencySymbol = currencySymbol;
+
 /* ---------- shared Alpine data ---------- */
 
 Alpine.store('auth', {
@@ -64,6 +83,14 @@ Alpine.store('theme', {
     primary: '#E33A45',
     accent: '#0EA5A4',
     logo: null,
+    currency: currency(),
+    currencySymbol: currencySymbol(),
+    applyBrandedClass() {
+        const rgb = hexToRgb(this.accent);
+        if (rgb) {
+            document.documentElement.style.setProperty('--accent', `${rgb.r} ${rgb.g} ${rgb.b}`);
+        }
+    },
     async load() {
         try {
             const r = await api.post('/api/user/configuration');
@@ -100,7 +127,9 @@ Alpine.store('theme', {
                 }
             }
             if (themeConfig.accent_color) this.accent = themeConfig.accent_color;
-            Alpine.store('auth').applyBrandedClass();
+            if (themeConfig.currency) this.currency = themeConfig.currency;
+            if (themeConfig.currency_symbol) this.currencySymbol = themeConfig.currency_symbol;
+            this.applyBrandedClass();
         } catch (e) {
             /* keep defaults */
         }
@@ -130,21 +159,23 @@ Alpine.data('appShell', () => ({
 /* ---------- auth pages ---------- */
 
 Alpine.data('loginScreen', () => ({
-    phone: '',
-    password: '',
     email: '',
-    mode: 'phone', // phone | email
+    password: '',
+    showPassword: false,
     loading: false,
     error: '',
+    notice: new URLSearchParams(location.search).get('registered')
+        ? 'Account created. Sign in to continue.'
+        : '',
     async submit() {
         this.error = '';
+        if (!this.email || !this.password) {
+            this.error = 'Enter your email and password.';
+            return;
+        }
         this.loading = true;
         try {
-            const creds =
-                this.mode === 'phone'
-                    ? { phone: this.phone, password: this.password }
-                    : { email: this.email, password: this.password };
-            const r = await api.login(creds);
+            const r = await api.loginWithEmail(this.email.trim(), this.password);
             if (!r.ok) {
                 this.error = r.message || 'Login failed';
                 return;
@@ -156,10 +187,6 @@ Alpine.data('loginScreen', () => ({
         } finally {
             this.loading = false;
         }
-    },
-    switchMode(mode) {
-        this.mode = mode;
-        this.error = '';
     },
 }));
 
@@ -228,17 +255,88 @@ Alpine.data('signupScreen', () => ({
     email: '',
     phone: '',
     password: '',
+    showPassword: false,
+    country: null,
+    countryQuery: '',
+    countriesOpen: false,
+    countriesLoading: true,
+    countries: [],
     loading: false,
     error: '',
+    async init() {
+        await this.loadCountries();
+    },
+    async loadCountries() {
+        this.countriesLoading = true;
+        try {
+            const r = await api.post('/api/user/countryList', {});
+            const list = r.ok && Array.isArray(r.data) ? r.data : [];
+            this.countries = list.map((c) => {
+                const iso = c.isoCode || c.iso_code || '';
+                const dial = c.phonecode ? '+' + String(c.phonecode).replace(/[^\d]/g, '') : '';
+                return {
+                    id: c.id,
+                    name: c.name || c.countryName || iso || 'Country',
+                    iso,
+                    dial,
+                    flag: flagEmoji(iso),
+                    currency: c.currency || null,
+                    min: c.minNumPhone || null,
+                    max: c.maxNumPhone || null,
+                };
+            });
+        } catch (e) {
+            this.countries = [];
+        } finally {
+            if (!this.countries.length) this.countries = staticCountries();
+            this.countriesLoading = false;
+        }
+    },
+    get filteredCountries() {
+        const q = (this.countryQuery || '').trim().toLowerCase();
+        if (!q) return this.countries;
+        return this.countries.filter(
+            (c) =>
+                c.name.toLowerCase().includes(q) ||
+                (c.iso || '').toLowerCase().includes(q) ||
+                (c.dial || '').includes(q)
+        );
+    },
+    selectCountry(c) {
+        this.country = c;
+        this.countryQuery = '';
+        this.countriesOpen = false;
+        this.error = '';
+    },
+    toggleCountries() {
+        this.countriesOpen = !this.countriesOpen;
+        if (this.countriesOpen) {
+            this.$nextTick(() => this.$refs.countrySearch && this.$refs.countrySearch.focus());
+        }
+    },
     async submit() {
         this.error = '';
+        if (!this.country || !this.country.id) {
+            this.error = 'Please select your country to continue.';
+            return;
+        }
+        if (!this.phone || !this.password || !this.email) {
+            this.error = 'Enter your phone number, email and password.';
+            return;
+        }
         this.loading = true;
         try {
+            const dial = this.country.dial || '';
+            const phone = dial + String(this.phone).replace(/^0+/, '').replace(/\s+/g, '');
+            const first_name =
+                this.first_name.trim() ||
+                (this.email.includes('@') ? this.email.split('@')[0] : 'Customer');
             const r = await api.post('/api/user/signup', {
-                first_name: this.first_name,
-                last_name: this.last_name,
-                email: this.email,
-                phone: this.phone,
+                first_name,
+                last_name: this.last_name.trim(),
+                country_id: this.country.id,
+                email: this.email.trim(),
+                phone,
                 password: this.password,
                 requested_from: 'web',
             });
@@ -247,10 +345,11 @@ Alpine.data('signupScreen', () => ({
                 return;
             }
             if (r.data && (r.data.access_token || r.data.token)) {
+                localStorage.setItem('fixcycle_token', r.data.access_token || r.data.token);
                 await Alpine.store('auth').bootstrap();
                 location.href = '/app';
             } else {
-                location.href = '/otp';
+                location.href = '/login?registered=1';
             }
         } catch (e) {
             this.error = e.message || 'Something went wrong';
@@ -614,7 +713,10 @@ Alpine.data('bookingFlow', () => ({
         this.drop = p.label;
     },
     currency() {
-        return Alpine.store('theme').currency || '';
+        return Alpine.store('theme').currency || currency();
+    },
+    money(value) {
+        return money(value);
     },
     async estimateBooking() {
         this.error = '';
@@ -801,7 +903,8 @@ Alpine.data('bookingsScreen', () => ({
                 subtitle: b.highlighted_small_text || b.small_text || '',
                 status: statusText(b.booking_status),
                 estimate: b.estimate_bill,
-                currency: b.currency || '',
+                currency: b.currency || currency(),
+                money: money(b.estimate_bill),
                 is_in_drive: b.is_in_drive,
             }));
         } catch (e) {
@@ -842,6 +945,9 @@ Alpine.data('bookingDetail', () => ({
             this.loading = false;
         }
     },
+    money(value) {
+        return money(value);
+    },
 }));
 
 /* ---------- wallet ---------- */
@@ -874,7 +980,11 @@ Alpine.data('walletScreen', () => ({
     },
     balance() {
         const u = Alpine.store('auth').user;
-        return u && (u.wallet_balance !== null && u.wallet_balance !== undefined) ? u.wallet_balance : '—';
+        if (!u || u.wallet_balance === null || u.wallet_balance === undefined) return '—';
+        return money(u.wallet_balance);
+    },
+    money(value) {
+        return money(value);
     },
     async loadTransactions() {
         this.txLoading = true;
@@ -950,6 +1060,9 @@ Alpine.data('profileScreen', () => ({
     initials() {
         const u = this.user || {};
         return ((u.first_name || '') + ' ' + (u.last_name || '')).trim().slice(0, 2).toUpperCase() || 'U';
+    },
+    money(value) {
+        return money(value);
     },
     logout() {
         api.logout().then(() => {

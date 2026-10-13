@@ -42,7 +42,7 @@
                             <p class="truncate text-xs text-slate-500" x-text="t.date || t.id"></p>
                         </div>
                         <p class="text-sm font-extrabold" :class="t.type === 'debit' || t.type === 'DEBIT' ? 'text-danger' : 'brand-text'"
-                           x-text="t.amount !== null && t.amount !== undefined ? t.amount : ''"></p>
+                           x-text="money(t.amount)"></p>
                     </div>
                 </template>
             </div>

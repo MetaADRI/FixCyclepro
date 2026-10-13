@@ -56,7 +56,8 @@ module.exports = {
                 'fluid-h2': 'clamp(1.5rem, 1.05rem + 1.8vw, 2.25rem)',
             },
             boxShadow: {
-                soft: '0 1px 2px 0 rgb(15 23 42 / 0.06), 0 8px 24px -6px rgb(15 23 42 / 0.12)',
+                soft: '0 1px 2px 0 rgb(15 23 42 / 0.06), 0 6px 24px -8px rgb(15 23 42 / 0.14)',
+                card: '0 4px 24px -8px rgb(15 23 42 / 0.25)',
                 lifted: '0 2px 4px 0 rgb(15 23 42 / 0.08), 0 16px 40px -12px rgb(15 23 42 / 0.22)',
                 sheet: '0 -8px 40px -12px rgb(15 23 42 / 0.25)',
             },

@@ -33,7 +33,7 @@
                         <p class="mt-0.5 truncate text-xs font-semibold brand-text" x-text="b.status"></p>
                     </div>
                     <div class="shrink-0 text-right">
-                        <p class="text-sm font-extrabold" x-text="b.estimate ? (b.currency + ' ' + b.estimate) : ''"></p>
+                            <p class="text-sm font-extrabold" x-text="b.estimate ? b.money : ''"></p>
                         <svg class="ml-auto mt-1 h-4 w-4 text-slate-300 dark:text-slate-600" aria-hidden="true"><use href="#i-chevron-right"/></svg>
                     </div>
                 </a>
