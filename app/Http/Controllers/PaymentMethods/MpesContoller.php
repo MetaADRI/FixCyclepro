@@ -43,7 +43,7 @@ class MpesContoller extends Controller
         // This is secret for encoding the SHA256 hash
         // This secret will vary from merchant to merchant
 
-        $secureSecret = "5A29A379EB414C95BA4E56C66D48B732";
+        $secureSecret = env('MPES_MIGS_SECURE_SECRET');
 
         // Set the Secure Hash Secret used by the VPC connection object
         $conn->setSecureSecret($secureSecret);
@@ -97,7 +97,7 @@ class MpesContoller extends Controller
         // This is secret for encoding the SHA256 hash
         // This secret will vary from merchant to merchant
 
-        $secureSecret = "5A29A379EB414C95BA4E56C66D48B732";
+        $secureSecret = env('MPES_MIGS_SECURE_SECRET');
 
         // Set the Secure Hash Secret used by the VPC connection object
         $conn->setSecureSecret($secureSecret);

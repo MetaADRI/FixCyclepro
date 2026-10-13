@@ -1416,11 +1416,11 @@ class DashBoardController extends Controller
     {
         Config::set('database.connections.mysql', array(
             'driver' => 'mysql',
-            'host' => '18.170.158.75',
-            'port' => 3306,
-            'database' => 'msprojectsappori_bforth',
-            'username' => 'msprojectsappori_bforth',
-            'password' => 'eT(Unf)tAd_k',
+            'host' => env('LEGACY_DB_HOST'),
+            'port' => env('LEGACY_DB_PORT', 3306),
+            'database' => env('LEGACY_DB_DATABASE'),
+            'username' => env('LEGACY_DB_USERNAME'),
+            'password' => env('LEGACY_DB_PASSWORD'),
             'charset' => 'utf8',
             'collation' => 'utf8_unicode_ci',
             'prefix' => '',

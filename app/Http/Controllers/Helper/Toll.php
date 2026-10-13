@@ -145,7 +145,7 @@ class Toll
 //        $drop = "-33.04703699999998,-71.62998";
 //        $token = "";
         $vehicle_type="car";
-        $token = "eWOG8OdJ1vetJ7c4MLvrLCh5Kas2";
+        $token = env('TOLL_API_TOKEN');
         $headers = array();
         $headers[] = 'Content-Type: application/javascript';
         $url = "https://us-central1-peaje-148206.cloudfunctions.net/calcularruta_api?token=".$token."&origin=".$pickup."&destination=".$drop."&car=".$vehicle_type;

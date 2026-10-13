@@ -538,7 +538,7 @@ class MercadoController extends Controller
         $code = $arr_param['code'];
         $redirect_ur = route('mercado.code.response');
         $post_param = [
-            'client_secret'=>'nqn6b50S6IosPGrYzJ8GO5AmDC3vszAY', // trem mercado client secret id
+            'client_secret'=>env('MERCADO_CLIENT_SECRET'), // trem mercado client secret id
             'client_id'=>'1603575310218843',// trem mercado client id
             'grant_type'=>"authorization_code",
             'code'=>$code,

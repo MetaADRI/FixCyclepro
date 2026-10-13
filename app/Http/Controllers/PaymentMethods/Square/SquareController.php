@@ -203,7 +203,7 @@ class SquareController extends Controller
 
         $tx_reference = $request_response['transactionId']; // order id
         $status_url = "https://connect.squareupsandbox.com/v2/orders/".$tx_reference;
-        $auth_token =  "EAAAED3U7z0cFsFDXKNhoF4a7M2LMFtK54cYlginVQiP7junnxBNTqZzbPt7W68Q";
+        $auth_token =  env('SQUARE_AUTH_TOKEN');
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_VERBOSE, true);
         curl_setopt($ch, CURLOPT_URL, $status_url);
@@ -375,7 +375,7 @@ class SquareController extends Controller
          else {
 
              $status_url = "https://connect.squareupsandbox.com/v2/orders/" . $tx_reference;
-             $auth_token = "EAAAED3U7z0cFsFDXKNhoF4a7M2LMFtK54cYlginVQiP7junnxBNTqZzbPt7W68Q";
+             $auth_token = env('SQUARE_AUTH_TOKEN');
              $ch = curl_init();
              curl_setopt($ch, CURLOPT_VERBOSE, true);
              curl_setopt($ch, CURLOPT_URL, $status_url);

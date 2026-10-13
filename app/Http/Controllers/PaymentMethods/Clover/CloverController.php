@@ -39,8 +39,8 @@ class CloverController extends Controller
             // check whether gateway is on sandbox or live
             $url = "https://scl-sandbox.dev.clover.com/v1/charges";
             $token_url = "https://token-sandbox.dev.clover.com/v1/tokens";
-            $access_token = "ed1113f0-c5ec-85d7-bdea-f14d27b6734e";
-            $public_token = "b58dca91767e82531a3501f9512daaa9";
+            $access_token = env('CLOVER_ACCESS_TOKEN');
+            $public_token = env('CLOVER_PUBLIC_TOKEN');
             if($payment_option_config->gateway_condition == 1)
             {
                 $url = "https://scl.clover.com/v1/charges";
@@ -207,8 +207,8 @@ class CloverController extends Controller
 
 //            $url = "https://scl-sandbox.dev.clover.com/v1/charges";
             $token_url = "https://token-sandbox.dev.clover.com/v1/tokens";
-            $access_token = "ed1113f0-c5ec-85d7-bdea-f14d27b6734e";
-            $public_token = "b58dca91767e82531a3501f9512daaa9";
+            $access_token = env('CLOVER_ACCESS_TOKEN');
+            $public_token = env('CLOVER_PUBLIC_TOKEN');
             $customer_url = "https://scl-sandbox.dev.clover.com/v1/customers";
             if($payment_option_config->gateway_condition == 1)
             {
@@ -309,8 +309,8 @@ class CloverController extends Controller
 
             $url = "https://scl-sandbox.dev.clover.com/v1/charges";
           //  $token_url = "https://token-sandbox.dev.clover.com/v1/tokens";
-            $access_token = "ed1113f0-c5ec-85d7-bdea-f14d27b6734e";
-           // $public_token = "b58dca91767e82531a3501f9512daaa9";
+            $access_token = env('CLOVER_ACCESS_TOKEN');
+           // $public_token = env('CLOVER_PUBLIC_TOKEN');
             //$customer_url = "https://scl-sandbox.dev.clover.com/v1/customers";
             if($payment_option_config->gateway_condition == 1)
             {
@@ -397,8 +397,8 @@ class CloverController extends Controller
             $capture_url = "https://scl-sandbox.dev.clover.com/v1/charges/".$capture."/capture";
            // $url = "https://scl-sandbox.dev.clover.com/v1/charges";
             //  $token_url = "https://token-sandbox.dev.clover.com/v1/tokens";
-            $access_token = "ed1113f0-c5ec-85d7-bdea-f14d27b6734e";
-            // $public_token = "b58dca91767e82531a3501f9512daaa9";
+            $access_token = env('CLOVER_ACCESS_TOKEN');
+            // $public_token = env('CLOVER_PUBLIC_TOKEN');
             //$customer_url = "https://scl-sandbox.dev.clover.com/v1/customers";
             if($payment_option_config->gateway_condition == 1)
             {

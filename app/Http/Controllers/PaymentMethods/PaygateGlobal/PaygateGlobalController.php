@@ -86,7 +86,7 @@ class PaygateGlobalController extends Controller
             // flooz =[79,96,97,98,99]
             $network = in_array($phone_number_prefix,[70,90,91,92,93]) ? "TMONEY" : "FLOOZ";//FLOOZ, TMONEY
             $fields['amount'] = $amount;
-            $fields['auth_token'] = $payment_option_config->api_secret_key;//"94291109-0cb6-4639-8d97-7ebb0ca3d7a4";
+            $fields['auth_token'] = $payment_option_config->api_secret_key;//env('PAYGATEGLOBAL_AUTH_TOKEN');
             $fields['phone_number'] = $request->payment_phone_number;
             $fields['identifier'] = $transaction_id;
             $fields['network'] = $network;
@@ -177,7 +177,7 @@ class PaygateGlobalController extends Controller
 
 
         $status_url = "https://paygateglobal.com/api/v1/status";
-        $auth_token = "94291109-0cb6-4639-8d97-7ebb0ca3d7a4";
+        $auth_token = env('PAYGATEGLOBAL_AUTH_TOKEN');
         $tx_reference = $request_response['tx_reference'];
         $fields['auth_token'] = $auth_token;
         $fields['tx_reference'] = $tx_reference;

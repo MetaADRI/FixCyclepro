@@ -25,7 +25,7 @@ class AamarPayController extends Controller
             // check whether gateway is on sandbox or live
             $url = "https://sandbox.aamarpay.com/request.php";
             $submit_url = "https://sandbox.aamarpay.com";
-            $secret_key = "dbb74894e82415a2f7ff0ec3a97e4183";
+            $secret_key = env('AAMARPAY_SANDBOX_SECRET_KEY');
             $store_id = "aamarpaytest";
             if($payment_option_config->gateway_condition == 1)
             {

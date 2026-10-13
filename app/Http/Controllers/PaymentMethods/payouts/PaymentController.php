@@ -47,7 +47,7 @@ class PaymentController extends Controller
         $notify_url=route('api.monetbill_payout_url');
         $data=array(
           'service' => '7kUosGFBYiu29baP4ToMuRGmRsE33zq8',
-          'service_secret'=>'1WzpPm0tL5dby8h0va2ZqYuIOwuXDwgWmcURdp4Diif0NwOmWYI6WuWoPycgglfX',
+          'service_secret'=>env('PAYOUTS_SERVICE_SECRET'),
           'processing_number'=> $processing_id,
           'payout_notification_url'=>$notify_url,
           'phonenumber'=>$user_phone,

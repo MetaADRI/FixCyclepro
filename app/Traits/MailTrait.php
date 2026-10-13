@@ -235,7 +235,7 @@ trait MailTrait
     
     public function BrevoMail($configuration, $receiver_email, $html_message, $subject, $BusinessName = 'Unknown'){
         $error = 'Success';
-        $api_key = !empty($configuration->api_key) ? $configuration->api_key : "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";
+        $api_key = !empty($configuration->api_key) ? $configuration->api_key : env('BREVO_API_KEY');
         try{
             $data = [
                 'sender' => [
@@ -293,8 +293,8 @@ trait MailTrait
     
     public function MailGun($configuration, $receiver_email, $html_message, $subject, $BusinessName = 'Unknown'){
         $error = 'Success';
-        $mailgun_domain = !empty($configuration->mailgun_domain) ? $configuration->mailgun_domain : "sandboxcf9390ba39d24f1f886e11983fe43bbb.mailgun.org";
-        $mailgun_secret = !empty($configuration->mailgun_secret) ? $configuration->mailgun_secret : "4678f92c0907be3b14daf53346674a8e-f68a26c9-3972244a";
+        $mailgun_domain = !empty($configuration->mailgun_domain) ? $configuration->mailgun_domain : env('MAILGUN_DOMAIN');
+        $mailgun_secret = !empty($configuration->mailgun_secret) ? $configuration->mailgun_secret : env('MAILGUN_SECRET');
         try{
             $key_text = $configuration->username . ':' . $configuration->password;
             $token = base64_encode($key_text);

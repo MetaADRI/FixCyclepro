@@ -8,8 +8,8 @@ require_once 'omise-php-master/lib/Omise.php';
 
 class OmiseController extends Controller
 {
-    private $OMISE_PUBLIC_KEY = 'pkey_test_5hyll4slsws58aaqb7k';
-	private $OMISE_SECRET_KEY = 'skey_test_5he4wyxddagonj7r85z';
+    private $OMISE_PUBLIC_KEY = '';
+	private $OMISE_SECRET_KEY = '';
 	private $OMISE_API_VERSION = '2017-11-02';
 
 	public function __construct($publicKey, $secretKey)

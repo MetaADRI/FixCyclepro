@@ -31,9 +31,9 @@ return [
     */
     'apps' => [
         'default' => [
-            'consumer_key' => 'fqXmQfB8Kl4TMmbtpYKdLhpbVGOHozg1',
+            'consumer_key' => env('MPESA_LIB_CONSUMER_KEY'),
 
-            'consumer_secret' => 'q4mLyHn7ZWKRytSD',
+            'consumer_secret' => env('MPESA_LIB_CONSUMER_SECRET'),
         ],
         'bulk' => [
             'consumer_key' => '',
@@ -110,7 +110,7 @@ return [
         | of the Merchant's Paybill Number.
         |
         */
-        'passkey' => '15e686de75c7845db12cf42e8e871bc48d799b01357f60a253a23e11a7bab43c',
+        'passkey' => env('MPESA_LIB_PASSKEY'),
 
         /*
         |--------------------------------------------------------------------------
