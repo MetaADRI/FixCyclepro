@@ -3589,11 +3589,11 @@ class CommonController extends Controller
             // $request->access_pin == 67589432 && $request->calling_from == 'USER' ? false : true;
             $merchant->ios_show_screen_driver = true;
             //$request->access_pin == 67589432  && $request->calling_from == 'DRIVER' ?  false : true;
-            $merchant->primary_color_driver = $merchant->ApplicationTheme && $merchant->ApplicationTheme->primary_color_driver ? $merchant->ApplicationTheme->primary_color_driver : "#E33A45";
+            $merchant->primary_color_driver = $merchant->ApplicationTheme && $merchant->ApplicationTheme->primary_color_driver ? $merchant->ApplicationTheme->primary_color_driver : "#287D1B";
             $merchant->driver_app_logo = $merchant->ApplicationTheme && $merchant->ApplicationTheme->driver_app_logo ? get_image($merchant->ApplicationTheme->driver_app_logo, 'driver_app_theme', $merchant->id) : url('/basic-images/driver_preview.png');
-            $merchant->primary_color_user = $merchant->ApplicationTheme && $merchant->ApplicationTheme->primary_color_user ? $merchant->ApplicationTheme->primary_color_user : "#E33A45";
+            $merchant->primary_color_user = $merchant->ApplicationTheme && $merchant->ApplicationTheme->primary_color_user ? $merchant->ApplicationTheme->primary_color_user : "#287D1B";
             $merchant->user_app_logo = $merchant->ApplicationTheme && $merchant->ApplicationTheme->user_app_logo ? get_image($merchant->ApplicationTheme->user_app_logo, 'user_app_theme', $merchant->id) : url('/basic-images/user_preview.png');
-            $merchant->primary_color_store = $merchant->ApplicationTheme && $merchant->ApplicationTheme->primary_color_store ? $merchant->ApplicationTheme->primary_color_store : "#E33A45";
+            $merchant->primary_color_store = $merchant->ApplicationTheme && $merchant->ApplicationTheme->primary_color_store ? $merchant->ApplicationTheme->primary_color_store : "#287D1B";
             $merchant->store_app_logo = $merchant->ApplicationTheme && $merchant->ApplicationTheme->store_app_logo ? get_image($merchant->ApplicationTheme->store_app_logo, 'business_logo', $merchant->id) : url('/basic-images/user_preview.png');
             $merchant->login_signup_ui = isset($merchant->ApplicationConfiguration->login_signup_ui) ? (string)$merchant->ApplicationConfiguration->login_signup_ui : "1";
             $merchant->full_screen = isset($merchant->ApplicationConfiguration->full_screen) ? $merchant->ApplicationConfiguration->full_screen == 1 : false;

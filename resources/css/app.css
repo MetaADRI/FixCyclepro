@@ -4,9 +4,9 @@
 
 @layer base {
     :root {
-        --brand: 227 58 69;        /* #E33A45 */
+        --brand: 40 125 27;        /* #287D1B — vibrant leaf green (identity) */
         --brand-contrast: 255 255 255;
-        --accent: 14 165 164;      /* #0EA5A4 */
+        --accent: 242 108 0;       /* #F26C00 — bright orange (primary CTA) */
         color-scheme: light dark;
     }
 
@@ -49,6 +49,7 @@
     .brand-text  { color: rgb(var(--brand) / 1); }
     .brand-border{ border-color: rgb(var(--brand) / 1); }
     .brand-contrast { color: rgb(var(--brand-contrast) / 1); }
+    .brand-soft  { background-color: rgb(var(--brand) / 0.12); }
     .accent-bg   { background-color: rgb(var(--accent) / 1); }
 
     .card {
@@ -61,10 +62,10 @@
 
     .btn-primary {
         @apply btn;
-        background-color: rgb(var(--brand) / 1);
+        background-color: rgb(var(--accent) / 1);
         color: rgb(var(--brand-contrast) / 1);
     }
-    .btn-primary:hover { background-color: rgb(var(--brand) / 0.9); }
+    .btn-primary:hover { background-color: rgb(var(--accent) / 0.88); }
 
     .btn-accent {
         @apply btn bg-accent-500 text-white hover:bg-accent-600;

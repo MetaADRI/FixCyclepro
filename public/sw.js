@@ -1,11 +1,14 @@
-const CACHE = 'fixcycle-v1';
+const CACHE = 'fixcycle-v2';
 const OFFLINE_URL = '/offline';
 
 const PRECACHE = [
     OFFLINE_URL,
     '/manifest.webmanifest',
-    '/icons/icon-192.png',
-    '/icons/icon-512.png',
+    '/images/fixcycle-icon-192.png',
+    '/images/fixcycle-icon-512.png',
+    '/images/fixcycle-icon-maskable-192.png',
+    '/images/fixcycle-icon-maskable-512.png',
+    '/images/fixcycle-logo.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -35,7 +38,9 @@ self.addEventListener('fetch', (event) => {
     // Built assets and icons: cache-first.
     if (
         url.origin === location.origin &&
-        (url.pathname.startsWith('/build/') || url.pathname.startsWith('/icons/'))
+        (url.pathname.startsWith('/build/') ||
+            url.pathname.startsWith('/icons/') ||
+            url.pathname.startsWith('/images/'))
     ) {
         event.respondWith(
             caches.match(request).then(

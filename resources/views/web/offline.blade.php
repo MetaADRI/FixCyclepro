@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>You're offline · {{ config('app.name', 'Fixcycle') }}</title>
-    <meta name="theme-color" content="#E33A45">
+    <meta name="theme-color" content="#287D1B">
     @if (file_exists(public_path('build/manifest.json')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else

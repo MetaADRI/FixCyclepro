@@ -80,8 +80,8 @@ Alpine.store('auth', {
 });
 
 Alpine.store('theme', {
-    primary: '#E33A45',
-    accent: '#0EA5A4',
+    primary: '#287D1B',
+    accent: '#F26C00',
     logo: null,
     currency: currency(),
     currencySymbol: currencySymbol(),

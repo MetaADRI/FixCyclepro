@@ -426,7 +426,7 @@ class UserConfiguration extends JsonResource
         }
         
         $in_app_call_config = InAppCallingConfigurations::where('merchant_id', $this->id)->first();
-        $primary_color_user = $this->ApplicationTheme->primary_color_user ? $this->ApplicationTheme->primary_color_user : "#E33A45";
+        $primary_color_user = $this->ApplicationTheme->primary_color_user ? $this->ApplicationTheme->primary_color_user : "#287D1B";
 
 
 

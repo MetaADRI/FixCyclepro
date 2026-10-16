@@ -4,15 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{{ $title ?? 'Fixcycle' }} · {{ config('app.name', 'Fixcycle') }}</title>
-    <meta name="theme-color" content="#E33A45">
+    <meta name="theme-color" content="#287D1B">
     <meta name="description" content="Book taxis, deliveries, handyman services and more with {{ config('app.name', 'Fixcycle') }}.">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/fixcycle-icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/fixcycle-icon-512.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/fixcycle-apple-touch.png') }}">
     @include('web.partials.config')
     @if (file_exists(public_path('build/manifest.json')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -29,7 +30,7 @@
         {{-- Desktop sidebar --}}
         <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 lg:flex">
             <a href="/" class="flex items-center gap-3 px-6 py-5" aria-label="{{ config('app.name', 'Fixcycle') }} home">
-                <img id="web-logo" src="{{ $logo ?? '' }}" alt="" class="h-9 w-9 rounded-xl object-contain"
+                <img id="web-logo" src="{{ $logo ?? asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-9 w-9 object-contain"
                      onerror="this.style.display='none';document.getElementById('web-logo-fallback').style.display='flex';">
                 <span id="web-logo-fallback" class="brand-bg brand-contrast hidden items-center justify-center rounded-xl px-2.5 py-1 text-lg font-extrabold" style="display:none">
                     {{ substr(config('app.name', 'Fixcycle'), 0, 2) }}

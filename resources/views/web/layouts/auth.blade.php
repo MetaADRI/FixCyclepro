@@ -4,15 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{{ $title ?? 'Welcome' }} · {{ config('app.name', 'Fixcycle') }}</title>
-    <meta name="theme-color" content="#E33A45">
+    <meta name="theme-color" content="#287D1B">
     <meta name="description" content="Sign in to {{ config('app.name', 'Fixcycle') }} to book taxis, deliveries, handyman services and more.">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/fixcycle-icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/fixcycle-icon-512.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/fixcycle-apple-touch.png') }}">
     @include('web.partials.config')
     @if (file_exists(public_path('build/manifest.json')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -27,9 +28,7 @@
 
     <div class="flex min-h-screen flex-col items-center justify-center px-4 py-10">
         <a href="/" class="mb-8 flex flex-col items-center gap-3" aria-label="{{ config('app.name', 'Fixcycle') }} home">
-            <span class="brand-bg brand-contrast flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-extrabold shadow-card">
-                {{ substr(config('app.name', 'Fixcycle'), 0, 2) }}
-            </span>
+            <img src="{{ asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-16 w-16 object-contain">
             <span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 {{ config('app.name', 'Fixcycle') }}
             </span>

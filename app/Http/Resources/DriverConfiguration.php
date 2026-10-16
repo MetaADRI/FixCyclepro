@@ -386,7 +386,7 @@ class DriverConfiguration extends JsonResource
                 ->values();
         }
 
-        $primary_color_driver = $this->ApplicationTheme->primary_color_driver ? $this->ApplicationTheme->primary_color_driver : "#E33A45";
+        $primary_color_driver = $this->ApplicationTheme->primary_color_driver ? $this->ApplicationTheme->primary_color_driver : "#287D1B";
         $customMarkers = \App\Models\CustomMapMarker::where('merchant_id', $this->id)
                     ->where('status', 1)
                     ->get()

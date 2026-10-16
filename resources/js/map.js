@@ -1,7 +1,7 @@
 import L from 'leaflet';
 
 export function makePin(color, label = '') {
-    const bg = color || '#E33A45';
+    const bg = color || '#287D1B';
     const html = `
         <div class="web-pin" title="${label}">
             <svg width="40" height="48" viewBox="0 0 40 48">

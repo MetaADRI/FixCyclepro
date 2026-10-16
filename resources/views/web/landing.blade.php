@@ -4,12 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{{ config('app.name', 'Fixcycle') }} — Mobility & on-demand services</title>
-    <meta name="theme-color" content="#E33A45">
+    <meta name="theme-color" content="#287D1B">
     <meta name="description" content="Book taxis, deliveries, couriers, handyman services and more with {{ config('app.name', 'Fixcycle') }}.">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/fixcycle-icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/fixcycle-icon-512.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/fixcycle-apple-touch.png') }}">
     @if (file_exists(public_path('build/manifest.json')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else
@@ -21,9 +23,7 @@
 
     <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
         <a href="/" class="flex items-center gap-2.5" aria-label="{{ config('app.name', 'Fixcycle') }}">
-            <span class="brand-bg brand-contrast flex h-10 w-10 items-center justify-center rounded-xl text-base font-extrabold">
-                {{ substr(config('app.name', 'Fixcycle'), 0, 2) }}
-            </span>
+            <img src="{{ asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-11 w-11 object-contain">
             <span class="text-lg font-extrabold tracking-tight">{{ config('app.name', 'Fixcycle') }}</span>
         </a>
         <nav class="flex items-center gap-3 text-sm font-semibold">
