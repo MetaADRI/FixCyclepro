@@ -54,6 +54,43 @@ Route::get('/health', function () {
     return response('OK', 200);
 })->name('health');
 
+/*
+| Readiness probe: proves the Postgres (Neon) service is reachable and usable
+| from inside the running app. Kept separate from /health so Render's liveness
+| check cannot crash-loop the container when a Neon compute is suspended.
+*/
+Route::get('/health/db', function () {
+    try {
+        $startedAt = microtime(true);
+
+        $row = DB::selectOne(
+            'select current_database() as database, current_user as "user", version() as version'
+        );
+
+        $tables = (int) DB::selectOne(
+            "select count(*) as count from information_schema.tables where table_schema = 'public'"
+        )->count;
+
+        return response()->json([
+            'status' => 'ok',
+            'service' => 'postgres',
+            'provider' => 'neon',
+            'branch' => env('NEON_BRANCH'),
+            'database' => $row->database,
+            'user' => $row->user,
+            'server_version' => explode(' ', $row->version)[1] ?? $row->version,
+            'public_tables' => $tables,
+            'latency_ms' => round((microtime(true) - $startedAt) * 1000, 1),
+        ], 200);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'service' => 'postgres',
+            'message' => $e->getMessage(),
+        ], 503);
+    }
+})->name('health.db');
+
 Route::get('/', function () {
     return view('welcome');
 });

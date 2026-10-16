@@ -19,6 +19,8 @@ public_html/hot
 storage/logs
 storage/framework
 .env
+# Render env file upload - contains live secrets, never commit
+render.env
 Homestead.yaml
 Homestead.json
 /.vagrant
@@ -66,3 +68,4 @@ OPENCODE_MEGA_PROMPT.md
 /.freebuff/
 /.kilo/
 checkin-*.md
+.neon
