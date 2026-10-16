@@ -49,8 +49,12 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
 WORKDIR /var/www/html
 
 # Layer 1: dependencies from the lockfile only (cached unless composer files change).
+# --no-autoloader matters: composer.json maps classmap paths (database/seeds,
+# database/factories) that are not copied yet at this point, and the optimized
+# autoloader refuses to build when they are missing. The autoloader is generated
+# further down, after COPY . ., where those directories exist.
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist
+RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction --prefer-dist
 
 # Layer 2: application code.
 # .dockerignore excludes .env, vendor, storage contents and .git — the image
