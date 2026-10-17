@@ -47,26 +47,35 @@
         </section>
 
         <section class="mx-auto grid max-w-6xl gap-5 px-5 pb-20 sm:grid-cols-3">
-            <div class="card">
-                <span class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl brand-soft">
-                    <svg class="h-6 w-6 brand-text" aria-hidden="true"><use href="#i-navigation"/></svg>
-                </span>
-                <h2 class="text-lg font-bold">Go anywhere</h2>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">City rides, rentals, transfers and outstation trips at transparent fares — tracked live from pickup to drop.</p>
+            <div class="feature-card">
+                <span class="feature-card-back" aria-hidden="true"></span>
+                <article class="feature-card-front">
+                    <span class="feature-icon">
+                        <svg class="h-6 w-6 brand-text" aria-hidden="true"><use href="#i-navigation"/></svg>
+                    </span>
+                    <h2 class="text-lg font-bold">Go anywhere</h2>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">City rides, rentals, transfers and outstation trips at transparent fares — tracked live from pickup to drop.</p>
+                </article>
             </div>
-            <div class="card">
-                <span class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl brand-soft">
-                    <svg class="h-6 w-6 brand-text" aria-hidden="true"><use href="#i-gift"/></svg>
-                </span>
-                <h2 class="text-lg font-bold">Send anything</h2>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Same-day couriers for documents, groceries and parcels — with multiple stops and proof of delivery.</p>
+            <div class="feature-card">
+                <span class="feature-card-back" aria-hidden="true"></span>
+                <article class="feature-card-front">
+                    <span class="feature-icon">
+                        <svg class="h-6 w-6 brand-text" aria-hidden="true"><use href="#i-gift"/></svg>
+                    </span>
+                    <h2 class="text-lg font-bold">Send anything</h2>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Same-day couriers for documents, groceries and parcels — with multiple stops and proof of delivery.</p>
+                </article>
             </div>
-            <div class="card">
-                <span class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl brand-soft">
-                    <svg class="h-6 w-6 brand-text" aria-hidden="true"><use href="#i-users"/></svg>
-                </span>
-                <h2 class="text-lg font-bold">Fix and hire</h2>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Skilled handymen and service professionals, ready when you are. Book by the hour or by the job.</p>
+            <div class="feature-card">
+                <span class="feature-card-back" aria-hidden="true"></span>
+                <article class="feature-card-front">
+                    <span class="feature-icon">
+                        <svg class="h-6 w-6 brand-text" aria-hidden="true"><use href="#i-users"/></svg>
+                    </span>
+                    <h2 class="text-lg font-bold">Fix and hire</h2>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Skilled handymen and service professionals, ready when you are. Book by the hour or by the job.</p>
+                </article>
             </div>
         </section>
     </main>
