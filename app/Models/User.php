@@ -67,12 +67,20 @@ class User extends Authenticatable
     {
         $request = Request::instance();
         $loginType = $request->logintype;
+        $merchant = null;
         if (!empty($_SERVER['HTTP_PUBLICKEY']) && !empty($_SERVER['HTTP_SECRETKEY'])) {
             $merchant = CommonController::MerchantObj($_SERVER['HTTP_PUBLICKEY'], $_SERVER['HTTP_SECRETKEY']);
-            $user_login = $merchant->ApplicationConfiguration->user_login;
-            $email_phone_enable = !empty($merchant->ApplicationConfiguration->email_phone_enable_on_login) && $merchant->ApplicationConfiguration->email_phone_enable_on_login == 1;
-            $merchant_id = $merchant['id'];
+        } elseif (!empty($request->access_pin)) {
+            $merchant = Merchant::where([['access_pin', '=', $request->access_pin], ['merchantStatus', '=', 1]])->first();
+        } elseif (!empty($request->merchant_id)) {
+            $merchant = Merchant::find($request->merchant_id);
         }
+        if (empty($merchant)) {
+            return null;
+        }
+        $user_login = $merchant->ApplicationConfiguration->user_login;
+        $email_phone_enable = !empty($merchant->ApplicationConfiguration->email_phone_enable_on_login) && $merchant->ApplicationConfiguration->email_phone_enable_on_login == 1;
+        $merchant_id = $merchant->id;
             if (!$email_phone_enable && $user_login == "EMAIL" || $email_phone_enable && $loginType == "EMAIL") {
                 return User::where([['merchant_id', '=', $merchant_id], ['email', '=', $user_cred], ['UserStatus', '=', 1],['user_delete','=',NULL]])
     //                ->orWhere([['merchant_id', '=', $merchant_id], ['unique_number', '=', $user_cred], ['UserStatus', '=', 1], ['login_type', '=', 1]])

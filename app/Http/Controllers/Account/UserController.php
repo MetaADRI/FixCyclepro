@@ -265,6 +265,26 @@ class UserController extends Controller
             return $this->failedResponse($errors[0]);
         }
 
+        // Resolve the country server-side. The web PWA sends country_id when the
+        // live country list loaded, but falls back to an ISO code when the offline
+        // list is used - and the user row must always carry a valid country.
+        $country = null;
+        if (!empty($request->country_id)) {
+            $country = Country::where('merchant_id', $merchant_id)->find($request->country_id);
+        }
+        if (empty($country) && !empty($request->country_code)) {
+            $country = Country::where('merchant_id', $merchant_id)
+                ->where(function ($query) use ($request) {
+                    $query->where('country_code', $request->country_code)
+                        ->orWhere('isoCode', $request->country_code);
+                })
+                ->first();
+        }
+        if (empty($country)) {
+            return $this->failedResponse('Please select a valid country to continue.');
+        }
+        $request->merge(['country_id' => $country->id]);
+
         // check current service for user
         $area = PolygenController::Area($request->latitude, $request->longitude, $merchant_id);
 
@@ -286,7 +306,7 @@ class UserController extends Controller
             // aplication config
             $app_config = ApplicationConfiguration::select('reward_points')->where('merchant_id', $merchant_id)->first();
 
-            $country = Country::select('id')->find($request->country_id);
+            // $country already resolved (and validated) above
             // check user document
             $signup_step = $app_config->user_document == 1 && $documentList = $country->documents->count() > 0 ? 1 : 3;
 

@@ -28,10 +28,7 @@
 
     <div class="flex min-h-screen flex-col items-center justify-center px-4 py-10">
         <a href="/" class="mb-8 flex flex-col items-center gap-3" aria-label="{{ config('app.name', 'Fixcycle') }} home">
-            <img src="{{ asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-16 w-16 object-contain">
-            <span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                {{ config('app.name', 'Fixcycle') }}
-            </span>
+            <img src="{{ asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-24 w-24 object-contain">
         </a>
 
         <div class="card w-full max-w-md px-6 py-8 sm:px-8">

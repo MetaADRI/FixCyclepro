@@ -30,13 +30,10 @@
         {{-- Desktop sidebar --}}
         <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 lg:flex">
             <a href="/" class="flex items-center gap-3 px-6 py-5" aria-label="{{ config('app.name', 'Fixcycle') }} home">
-                <img id="web-logo" src="{{ $logo ?? asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-9 w-9 object-contain"
+                <img id="web-logo" src="{{ $logo ?? asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-12 w-12 object-contain"
                      onerror="this.style.display='none';document.getElementById('web-logo-fallback').style.display='flex';">
                 <span id="web-logo-fallback" class="brand-bg brand-contrast hidden items-center justify-center rounded-xl px-2.5 py-1 text-lg font-extrabold" style="display:none">
                     {{ substr(config('app.name', 'Fixcycle'), 0, 2) }}
-                </span>
-                <span class="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
-                    {{ config('app.name', 'Fixcycle') }}
                 </span>
             </a>
             <nav class="flex-1 space-y-1 px-3 py-2" aria-label="Main">

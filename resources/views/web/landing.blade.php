@@ -23,8 +23,7 @@
 
     <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
         <a href="/" class="flex items-center gap-2.5" aria-label="{{ config('app.name', 'Fixcycle') }}">
-            <img src="{{ asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-11 w-11 object-contain">
-            <span class="text-lg font-extrabold tracking-tight">{{ config('app.name', 'Fixcycle') }}</span>
+            <img src="{{ asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-16 w-16 object-contain">
         </a>
         <nav class="flex items-center gap-3 text-sm font-semibold">
             <a href="/login" class="btn-ghost px-4 py-2">Sign in</a>

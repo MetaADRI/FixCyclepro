@@ -35,7 +35,7 @@
                         <li>
                             <button type="button" role="option"
                                     class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
-                                    @click="country = c; countriesOpen = false; countryQuery = ''">
+                                    @click="selectCountry(c)">
                                 <span class="text-lg leading-none" x-text="c.flag"></span>
                                 <span class="flex-1 truncate" x-text="c.name"></span>
                                 <span class="shrink-0 text-slate-400" x-text="c.dial"></span>

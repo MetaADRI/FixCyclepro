@@ -272,7 +272,7 @@ Alpine.data('signupScreen', () => ({
             const r = await api.post('/api/user/countryList', {});
             const list = r.ok && Array.isArray(r.data) ? r.data : [];
             this.countries = list.map((c) => {
-                const iso = c.isoCode || c.iso_code || '';
+                const iso = c.country_code || c.isoCode || c.iso_code || '';
                 const dial = c.phonecode ? '+' + String(c.phonecode).replace(/[^\d]/g, '') : '';
                 return {
                     id: c.id,
@@ -316,8 +316,12 @@ Alpine.data('signupScreen', () => ({
     },
     async submit() {
         this.error = '';
-        if (!this.country || !this.country.id) {
+        if (!this.country) {
             this.error = 'Please select your country to continue.';
+            return;
+        }
+        if (!this.country.id && !this.country.iso) {
+            this.error = 'We could not load a valid country. Refresh the page and try again.';
             return;
         }
         if (!this.phone || !this.password || !this.email) {
@@ -334,7 +338,8 @@ Alpine.data('signupScreen', () => ({
             const r = await api.post('/api/user/signup', {
                 first_name,
                 last_name: this.last_name.trim(),
-                country_id: this.country.id,
+                country_id: this.country.id || null,
+                country_code: this.country.iso || null,
                 email: this.email.trim(),
                 phone,
                 password: this.password,
