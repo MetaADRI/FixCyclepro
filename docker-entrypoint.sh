@@ -14,4 +14,13 @@ mkdir -p \
     storage/logs \
     bootstrap/cache
 
+# Passport signing keys are gitignored (.gitignore: /storage/oauth-*.key) and the
+# Render disk mounts empty over storage/, so they are absent on a fresh boot.
+# Without them every token request fails with "Invalid key supplied", which the
+# web login/signup flow surfaces as "Attempt to read property access_token on null".
+# Generate once; the Render disk keeps them for subsequent deploys.
+if [ ! -f storage/oauth-private.key ] || [ ! -f storage/oauth-public.key ]; then
+    php artisan passport:keys --force || echo "WARNING: passport:keys failed"
+fi
+
 exec "$@"

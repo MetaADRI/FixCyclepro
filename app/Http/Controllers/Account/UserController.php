@@ -463,8 +463,9 @@ class UserController extends Controller
                     app()->instance('request', $request_instance_before_token);
                 }
                 $collectArray = json_decode($collect_response);
-                if (isset($collectArray->error)) {
-                    return response()->json(['result' => "0", 'message' => $collectArray->message, 'data' => []]);
+                if (isset($collectArray->error) || empty($collectArray) || empty($collectArray->access_token)) {
+                    $msg = isset($collectArray->message) ? $collectArray->message : ($collectArray->error_description ?? 'Token generation failed');
+                    return response()->json(['result' => "0", 'message' => $msg, 'data' => []]);
                 }
                 // add user player id in user_devices id
                 if ($request->requested_from != 'web') {
