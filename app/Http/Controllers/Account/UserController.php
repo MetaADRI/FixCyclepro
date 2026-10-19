@@ -463,11 +463,13 @@ class UserController extends Controller
                     app()->instance('request', $request_instance_before_token);
                 }
                 $collectArray = json_decode($collect_response);
-                if (json_last_error() !== JSON_ERROR_NONE || empty($collectArray) || isset($collectArray->error) || empty($collectArray->access_token)) {
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $msg = 'Token generation failed (invalid response)';
+                    try { \Log::error('oauth_token_decode_error', ['resp' => substr($collect_response, 0, 500), 'json_err' => json_last_error_msg()]); } catch (\Exception $e) {}
+                    return response()->json(['result' => "0", 'message' => $msg, 'data' => []]);
+                }
+                if (empty($collectArray) || isset($collectArray->error) || empty($collectArray->access_token)) {
                     $msg = (isset($collectArray) && isset($collectArray->message)) ? $collectArray->message : ((isset($collectArray) && isset($collectArray->error_description)) ? $collectArray->error_description : 'Token generation failed');
-                    if (json_last_error() !== JSON_ERROR_NONE) {
-                        $msg = 'Token generation failed (invalid response)';
-                    }
                     try { \Log::error('oauth_token_decode_error', ['resp' => substr($collect_response, 0, 500)]); } catch (\Exception $e) {}
                     return response()->json(['result' => "0", 'message' => $msg, 'data' => []]);
                 }
