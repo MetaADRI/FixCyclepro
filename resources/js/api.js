@@ -1,6 +1,27 @@
 const TOKEN_KEY = 'fixcycle_token';
 const USER_KEY = 'fixcycle_user';
 
+// Endpoints that establish a session or are public. They authenticate with the
+// merchant access pin (not a bearer token), so we must never attach a stored
+// token to them — a stale token would otherwise be rejected by ApiMiddleware
+// with "unauthorised request" before the access pin is ever checked.
+const PUBLIC_PATHS = [
+    '/api/user/login',
+    '/api/user/login/otp',
+    '/api/user/on-board',
+    '/api/user/signup',
+    '/api/user/socialsignin',
+    '/api/user/socialsingup',
+    '/api/user/countryList',
+    '/api/user/configuration',
+    '/api/user/fastlane-configuration',
+];
+
+function isPublicPath(path) {
+    const p = String(path).split('?')[0];
+    return PUBLIC_PATHS.includes(p);
+}
+
 function runtimeConfig() {
     return (typeof window !== 'undefined' && window.FixConfig) || {};
 }
@@ -81,9 +102,9 @@ function normalize(body, status) {
 }
 
 export async function post(path, params = {}) {
-    const headers = { Accept: 'application/json' };
+    const headers = { Accept: 'application/json', 'Content-Type': 'application/json' };
     const t = token();
-    if (t) headers['Authorization'] = 'Bearer ' + t;
+    if (t && !isPublicPath(path)) headers['Authorization'] = 'Bearer ' + t;
 
     const cfg = runtimeConfig();
     const payload = { ...params };
@@ -102,7 +123,7 @@ export async function post(path, params = {}) {
 export async function get(path) {
     const headers = { Accept: 'application/json' };
     const t = token();
-    if (t) headers['Authorization'] = 'Bearer ' + t;
+    if (t && !isPublicPath(path)) headers['Authorization'] = 'Bearer ' + t;
     const res = await fetch(path, { headers });
     const body = await res.json().catch(() => ({}));
     return normalize(body, res.status);

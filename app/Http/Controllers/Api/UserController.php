@@ -835,6 +835,7 @@ class UserController extends Controller
 
     public function Configuration(Request $request)
     {
+        set_time_limit(300);
         // $a = 'cGI\/gZWJqqY9dx1T1XPYjw==';
         // $secret = 'p9Nf8xLqzB1wKv3rjY5Tg4D2H7VbXs6C';
         // $iv = "1a2b3c4d5e6f7890";

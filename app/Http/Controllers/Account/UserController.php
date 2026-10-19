@@ -130,6 +130,7 @@ class UserController extends Controller
 
     public function SignUp(Request $request)
     {
+        set_time_limit(300);
         $merchant_id = $request->merchant_id;
         $string_file = $this->getStringFile($merchant_id);
         if($request->timestampvalue){
@@ -441,20 +442,26 @@ class UserController extends Controller
                 return $return_data;
             } else {
                 Config::set('auth.guards.api.provider', 'users');
-                $request->request->add([
+                $params = [
                     'grant_type' => 'password',
                     'client_id' => $client->id,
                     'client_secret' => $client->secret,
                     'username' => $parameter,
                     'password' => $request->password,
                     'scope' => '',
-                ]);
+                ];
                 $token_generation_after_login = Request::create(
                     'oauth/token',
-                    'POST'
+                    'POST',
+                    array_merge($request->input(), $params)
                 );
-                // return login details after user signup
-                $collect_response = \Route::dispatch($token_generation_after_login)->getContent();
+                $request_instance_before_token = app('request');
+                app()->instance('request', $token_generation_after_login);
+                try {
+                    $collect_response = \Route::dispatch($token_generation_after_login)->getContent();
+                } finally {
+                    app()->instance('request', $request_instance_before_token);
+                }
                 $collectArray = json_decode($collect_response);
                 if (isset($collectArray->error)) {
                     return response()->json(['result' => "0", 'message' => $collectArray->message, 'data' => []]);
@@ -483,6 +490,7 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
+        set_time_limit(300);
         $merchant_id = $request->merchant_id;
         $string_file = $this->getStringFile($merchant_id);
 
@@ -584,20 +592,26 @@ class UserController extends Controller
             }
             else{
                 $client = Client::where([['user_id', '=', $merchant_id], ['password_client', '=', 1]])->first();
-                Config::set('auth.guards.api.provider', 'users');
-                $request->request->add([
+                $params = [
                     'grant_type' => 'password',
                     'client_id' => $client->id,
                     'client_secret' => $client->secret,
                     'username' => $phone,
                     'password' => $request->password,
                     'scope' => '',
-                ]);
+                ];
                 $token_generation_after_login = Request::create(
                     'oauth/token',
-                    'POST'
+                    'POST',
+                    array_merge($request->input(), $params)
                 );
-                $collect_response = \Route::dispatch($token_generation_after_login)->getContent();
+                $request_instance_before_token = app('request');
+                app()->instance('request', $token_generation_after_login);
+                try {
+                    $collect_response = \Route::dispatch($token_generation_after_login)->getContent();
+                } finally {
+                    app()->instance('request', $request_instance_before_token);
+                }
                 $collectArray = json_decode($collect_response);
                 if (isset($collectArray->error)) {
                     return $this->failedResponse(trans("$string_file.failed_cred"));
@@ -1015,9 +1029,12 @@ class UserController extends Controller
 
     public function Details(Request $request)
     {
+        set_time_limit(300);
         $user = $request->user('api');
-        $device_data = array('user_id' => $user->id, 'unique_number' => $request->unique_no, 'package_name' => $request->package_name, 'apk_version' => $request->apk_version, 'language_code' => $request->language_code, 'manufacture' => $request->manufacture, 'model' => $request->model, 'device' => $request->device, 'operating_system' => $request->operating_system, 'player_id' => $request->player_id);
-        save_user_device_player_id($device_data);
+        if (!empty($request->unique_no)) {
+            $device_data = array('user_id' => $user->id, 'unique_number' => $request->unique_no, 'package_name' => $request->package_name, 'apk_version' => $request->apk_version, 'language_code' => $request->language_code, 'manufacture' => $request->manufacture, 'model' => $request->model, 'device' => $request->device, 'operating_system' => $request->operating_system, 'player_id' => $request->player_id);
+            save_user_device_player_id($device_data);
+        }
 
         //check doc
         check_and_update_user_document_status($user);

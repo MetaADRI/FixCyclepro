@@ -79,6 +79,18 @@ Alpine.store('auth', {
     },
 });
 
+Alpine.data('auth', () => ({
+    get user() {
+        return Alpine.store('auth').user;
+    },
+    get isLoggedIn() {
+        return isLoggedIn();
+    },
+    logout() {
+        Alpine.store('auth').logout();
+    },
+}));
+
 Alpine.store('theme', {
     primary: '#287D1B',
     accent: '#F26C00',
