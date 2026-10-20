@@ -51,6 +51,32 @@ class UserController extends Controller
 {
     use ImageTrait, ApiResponseTrait, MailTrait, MerchantTrait, AreaTrait;
 
+    /**
+     * Decode an /oauth/token response. Returns [decoded, null] on success or
+     * [decoded|null, message] when the response is unusable (non-JSON body,
+     * OAuth error, or missing access_token). Logs the raw body on failure.
+     */
+    private function decodePassportTokenResponse($collect_response)
+    {
+        $collectArray = json_decode($collect_response);
+        $json_failed = json_last_error() !== JSON_ERROR_NONE;
+        if (!$json_failed && !empty($collectArray) && !isset($collectArray->error) && !empty($collectArray->access_token)) {
+            return [$collectArray, null];
+        }
+        $msg = 'Token generation failed';
+        if ($json_failed) {
+            $msg = 'Token generation failed (invalid response)';
+        } elseif (isset($collectArray->message)) {
+            $msg = $collectArray->message;
+        } elseif (isset($collectArray->error_description)) {
+            $msg = $collectArray->error_description;
+        }
+        try {
+            \Log::error('oauth_token_decode_error', ['resp' => substr((string) $collect_response, 0, 500)]);
+        } catch (\Exception $e) {}
+        return [$collectArray, $msg];
+    }
+
     public function UserDetail(Request $request)
     {
         $user = $request->user('api');
@@ -619,9 +645,9 @@ class UserController extends Controller
                 } finally {
                     app()->instance('request', $request_instance_before_token);
                 }
-                $collectArray = json_decode($collect_response);
-                if (isset($collectArray->error)) {
-                    return $this->failedResponse(trans("$string_file.failed_cred"));
+                list($collectArray, $token_error) = $this->decodePassportTokenResponse($collect_response);
+                if ($token_error !== null) {
+                    return $this->failedResponse($token_error);
                 }
             }
             // add user player id in user_devices id
@@ -723,10 +749,9 @@ class UserController extends Controller
                 'POST'
             );
             $collect_response = \Route::dispatch($token_generation_after_login)->getContent();
-            $collectArray = json_decode($collect_response);
-            if (isset($collectArray->error)) {
+            list($collectArray, $token_error) = $this->decodePassportTokenResponse($collect_response);
+            if ($token_error !== null) {
                 return $this->failedResponse(trans("$string_file.failed_cred"));
-                //                return response()->json(['result' => "0", 'message' => trans('auth.failed'), 'data' => []]);
             }
             // add user player id in user_devices id
             // $device_data = array('user_id'=>$user->id,'unique_number'=>$request->unique_no,'package_name'=>$request->package_name, 'player_id' => $request->player_id);
@@ -1117,9 +1142,9 @@ class UserController extends Controller
                 'POST'
             );
             $collect_response = \Route::dispatch($token_generation_after_login)->getContent();
-            $collectArray = json_decode($collect_response);
-            if (isset($collectArray->error) || empty($collectArray)) {
-                return $this->failedResponse($collectArray->message);
+            list($collectArray, $token_error) = $this->decodePassportTokenResponse($collect_response);
+            if ($token_error !== null) {
+                return $this->failedResponse($token_error);
             }
             $push_notification = get_merchant_notification_provider($merchant_id, $user->id, 'user');
             $return_data = array(
@@ -1381,9 +1406,9 @@ class UserController extends Controller
                 'POST'
             );
             $collect_response = \Route::dispatch($token_generation_after_login)->getContent();
-            $collectArray = json_decode($collect_response);
-            if (isset($collectArray->error)) {
-                return $this->failedResponse($collectArray->message);
+            list($collectArray, $token_error) = $this->decodePassportTokenResponse($collect_response);
+            if ($token_error !== null) {
+                return $this->failedResponse($token_error);
             }
             $push_notification = get_merchant_notification_provider($merchant_id, $user->id, 'user');
             $return_data = array(
@@ -1524,9 +1549,9 @@ class UserController extends Controller
                 'POST'
             );
             $collect_response = \Route::dispatch($token_generation_after_login)->getContent();
-            $collectArray = json_decode($collect_response);
-            if (isset($collectArray->error)) {
-                return $this->failedResponse($collectArray->message);
+            list($collectArray, $token_error) = $this->decodePassportTokenResponse($collect_response);
+            if ($token_error !== null) {
+                return $this->failedResponse($token_error);
             }
             $push_notification = get_merchant_notification_provider($request->merchant_id, $user->id, 'user');
             $return_data = array(
@@ -2339,8 +2364,8 @@ class UserController extends Controller
                 'POST'
             );
             $collect_response = \Route::dispatch($token_generation_after_login)->getContent();
-            $collectArray = json_decode($collect_response);
-            if (isset($collectArray->error)) {
+            list($collectArray, $token_error) = $this->decodePassportTokenResponse($collect_response);
+            if ($token_error !== null) {
                 return $this->failedResponse(trans("$string_file.failed_cred"));
             }
 
