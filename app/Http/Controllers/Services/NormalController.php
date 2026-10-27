@@ -22,6 +22,7 @@ use App\Models\VehicleType;
 use App\Http\Controllers\Helper\GoogleController;
 use App\Http\Controllers\Helper\PriceController;
 use App\Http\Controllers\Helper\DistanceController;
+use App\Http\Controllers\Helper\DistanceCalculation;
 use App\Http\Controllers\Helper\BookingDataController;
 use App\Traits\AreaTrait;
 use App\Traits\ApiResponseTrait;
@@ -220,7 +221,11 @@ class NormalController extends Controller
             $selected_map = getSelectedMap($request->user('api')->Merchant, "CHECKOUT");
             $estimate_driver_distance = "";
             $estimate_driver_time = "";
-            $drop_locationArray = json_decode($request->drop_location, true);
+            $drop_locationRaw = $request->drop_location;
+            $drop_locationArray = is_array($drop_locationRaw) ? $drop_locationRaw : json_decode($drop_locationRaw, true);
+            if (!is_array($drop_locationArray)) {
+                $drop_locationArray = [];
+            }
 //            $dropLocation = isset($drop_locationArray[0]) ? $drop_locationArray[0] : '';
             $dropLocation = count($drop_locationArray)>0 ? array_key_last($drop_locationArray) : '';
             $drop_lat = isset($drop_locationArray[$dropLocation]['drop_latitude']) ? $drop_locationArray[$dropLocation]['drop_latitude'] : '';
@@ -385,7 +390,35 @@ class NormalController extends Controller
                 }
             }
 
-            if($configuration->eta_calculation_method == 2 || (empty($request->estimate_distance) || empty($request->estimate_time))){
+            $provider_ready = ($selected_map == "GOOGLE") ? !empty($configuration->google_key) : !empty($configuration->map_box_key);
+            if (!$provider_ready && (empty($request->estimate_distance) || empty($request->estimate_time))) {
+                $total_distance_meter = 0;
+                $distance_helper = new DistanceCalculation();
+                $previous_point = $request->pickup_latitude . ',' . $request->pickup_longitude;
+                foreach ((array) $drop_locationArray as $drop_point) {
+                    if (empty($drop_point['drop_latitude']) || empty($drop_point['drop_longitude'])) {
+                        continue;
+                    }
+                    $current_point = $drop_point['drop_latitude'] . ',' . $drop_point['drop_longitude'];
+                    $total_distance_meter += $distance_helper->distanceCalculation($previous_point, $current_point) * 1000;
+                    $previous_point = $current_point;
+                }
+                $total_time = ($total_distance_meter / 1000) / 25 * 3600;
+                $total_time_minutes = (int) round($total_time / 60);
+                $total_time_text = $total_time_minutes . ' mins';
+                if ($total_time_minutes > 60) {
+                    $total_time_text = round($total_time_minutes / 60) . ' hr';
+                }
+                $googleArray = [
+                    'total_distance' => $total_distance_meter,
+                    'total_distance_text' => round($total_distance_meter / 1000),
+                    'total_time' => $total_time,
+                    'total_time_minutes' => $total_time_minutes,
+                    'total_time_text' => $total_time_text,
+                    'image' => "",
+                ];
+            }
+            else if($configuration->eta_calculation_method == 2 || (empty($request->estimate_distance) || empty($request->estimate_time))){
                 if($selected_map == "GOOGLE"){
                     $googleArray = GoogleController::GoogleStaticImageAndDistance($request->pickup_latitude, $request->pickup_longitude, $drop_locationArray, $configuration->google_key, $units,$string_file);
                 }
@@ -483,6 +516,7 @@ class NormalController extends Controller
 
         }catch(\Exception $e)
         {
+            \Log::error('CHECKOUT_DETAIL_FAIL: '.$e->getMessage()."\n".$e->getTraceAsString());
             throw new \Exception($e->getMessage());
         }
     }

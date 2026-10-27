@@ -298,7 +298,22 @@ class HomeController extends Controller
                     })
                     ->where('country_areas.merchant_id', $merchant_id)
                     ->where('country_areas.id', $areas->id)
-                    ->groupBy('cavt.vehicle_type_id', 'cavt.service_type_id')
+                    ->groupBy(
+                        'vt.id',
+                        'vt.vehicleTypeImage',
+                        'vt.ride_now',
+                        'vt.ride_later',
+                        'vt.is_gallery_image_upload',
+                        'vt.volumetric_capacity',
+                        'vt.package_weight_range',
+                        'vt.engine_type',
+                        'cavt.service_type_id',
+                        'cavt.vehicle_type_id',
+                        'country_areas.merchant_id',
+                        'lvt.vehicleTypeName',
+                        'lvt.vehicleTypeDescription',
+                        'vt.sequence'
+                    )
                     ->orderBy('vt.sequence')
                     ->get();
 

@@ -451,7 +451,7 @@ class BookingDataController extends Controller
                 'pickup_latitude' => $data->pickup_latitude ?? null,
                 'pickup_longitude' => $data->pickup_longitude ?? null,
                 'booking_type' => $data->booking_type?? null,
-                'drop_location' => $data->drop_location ?? null,
+                'drop_location' => is_array($data->drop_location) ? json_encode($data->drop_location) : ($data->drop_location ?? null),
                 'pickup_location' => $data->pick_up_location ?? null,
                 'later_booking_date'=> !empty($data->later_booking_date) ? $data->later_booking_date." ".$data->later_booking_time : null,
                 'failreason' => $reason
@@ -1052,9 +1052,9 @@ class BookingDataController extends Controller
           $user_id = $details->User->id;
          $avg = "";
          if($user_id){
-             $avg = BookingRating::whereHas('Booking', function ($q) use ($user_id) {
-                 $q->where('user_id', $user_id);
-             })->avg('driver_rating_points');
+              $avg = BookingRating::whereHas('Booking', function ($q) use ($user_id) {
+                  $q->where('user_id', $user_id);
+              })->selectRaw('AVG(CAST(driver_rating_points AS DECIMAL(10,2))) AS avg_rating')->value('avg_rating');
          }
 
          $hotel_amount = "";

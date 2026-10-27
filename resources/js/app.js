@@ -1,4 +1,5 @@
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import Alpine from 'alpinejs';
 import api, {
     isLoggedIn,
@@ -11,7 +12,15 @@ import api, {
     money,
 } from './api';
 import { staticCountries, flagEmoji } from './countries';
-import { createMap, makePin, reverseGeocode, searchPlaces } from './map';
+import {
+    createMap,
+    makePin,
+    makeCarIcon,
+    decodePolyline,
+    fetchRoute,
+    reverseGeocode,
+    searchPlaces,
+} from './map';
 import createBookingTracker from './booking-tracker';
 
 window.Fixapi = api;
@@ -415,6 +424,7 @@ function dropPayload(drops) {
         .filter((d) => d && d.lat)
         .map((d) => ({
             drop_address: d.label || d.address || '',
+            drop_location: d.label || d.address || '',
             drop_latitude: String(d.lat),
             drop_longitude: String(d.lng),
         }));
@@ -562,6 +572,12 @@ Alpine.data('bookingFlow', () => ({
     payment_option_id: null,
     processing: false,
     error: '',
+    previewMap: null,
+    previewPickup: null,
+    previewStops: [],
+    previewLine: null,
+    previewKey: '',
+    previewInfo: '',
     async init() {
         const seg = segmentStore();
         const urlSeg = new URLSearchParams(location.search).get('segment');
@@ -616,6 +632,7 @@ Alpine.data('bookingFlow', () => ({
                     } catch (e) {}
                     this.locating = false;
                     resolve();
+                    this.$nextTick(() => this.syncPreview());
                 },
                 () => {
                     this.locating = false;
@@ -696,9 +713,11 @@ Alpine.data('bookingFlow', () => ({
     addDrop() {
         if (this.dropRows.length >= 4) return;
         this.dropRows.push({ label: '', lat: null, lng: null });
+        this.$nextTick(() => this.syncPreview());
     },
     removeDrop(i) {
         if (this.dropRows.length > 1) this.dropRows.splice(i, 1);
+        this.$nextTick(() => this.syncPreview());
     },
     async searchFor(index) {
         const q = (this.term || '').trim();
@@ -723,11 +742,72 @@ Alpine.data('bookingFlow', () => ({
         } else {
             this.drop = p.label;
         }
+        this.syncPreview();
     },
     setMainDrop(p) {
         this.results = [];
         this.term = p.label;
         this.drop = p.label;
+        this.syncPreview();
+    },
+    async syncPreview() {
+        const el = this.$refs.previewMap;
+        if (!el || !this.coords) return;
+        if (!this.previewMap) {
+            this.previewMap = createMap(el, { center: this.coords, zoom: 14 });
+            setTimeout(() => this.previewMap && this.previewMap.invalidateSize(), 80);
+        }
+        const pickup = { lat: this.coords.lat, lng: this.coords.lng };
+        if (!this.previewPickup) {
+            this.previewPickup = L.marker([pickup.lat, pickup.lng], { icon: makePin('#287D1B') }).addTo(this.previewMap);
+        } else {
+            this.previewPickup.setLatLng([pickup.lat, pickup.lng]);
+        }
+
+        const hasPoint = (v) => v !== null && v !== undefined && v !== '';
+        const stops = this.dropRows
+            .filter((r) => hasPoint(r.lat) && hasPoint(r.lng))
+            .map((r) => ({ lat: Number(r.lat), lng: Number(r.lng) }))
+            .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+
+        (this.previewStops || []).forEach((m) => this.previewMap.removeLayer(m));
+        this.previewStops = stops.map((s) =>
+            L.marker([s.lat, s.lng], { icon: makePin('#E8562A') }).addTo(this.previewMap)
+        );
+
+        const points = [pickup, ...stops];
+        const key = points.map((p) => `${p.lat.toFixed(4)},${p.lng.toFixed(4)}`).join('|');
+        if (points.length > 1 && key !== this.previewKey) {
+            this.previewKey = key;
+            this.previewInfo = 'Calculating route…';
+            const route = await fetchRoute(points);
+            if (route && key === this.previewKey) {
+                const km = (route.distance / 1000).toFixed(1);
+                const min = Math.max(1, Math.round(route.duration / 60));
+                this.previewInfo = `About ${km} km · ${min} min drive`;
+                if (!this.previewLine) {
+                    this.previewLine = L.polyline(route.coordinates, { color: '#287D1B', weight: 5, opacity: 0.85 }).addTo(this.previewMap);
+                } else {
+                    this.previewLine.setLatLngs(route.coordinates);
+                }
+            } else if (!route) {
+                this.previewInfo = 'Route preview unavailable';
+            }
+        } else if (points.length <= 1) {
+            this.previewKey = '';
+            this.previewInfo = '';
+            if (this.previewLine) {
+                this.previewMap.removeLayer(this.previewLine);
+                this.previewLine = null;
+            }
+        }
+
+        const markers = [this.previewPickup, ...(this.previewStops || [])].filter(Boolean);
+        if (markers.length === 1) {
+            this.previewMap.setView(markers[0].getLatLng(), 15);
+        } else if (markers.length > 1) {
+            this.previewMap.fitBounds(L.featureGroup(markers).getBounds().pad(0.25));
+        }
     },
     currency() {
         return Alpine.store('theme').currency || currency();
@@ -742,7 +822,21 @@ Alpine.data('bookingFlow', () => ({
         this.estimate = null;
         this.checkout = null;
         try {
-            const r = await api.post('/api/user/checkout', {
+            let estimateDistance = null;
+            let estimateTime = null;
+            const stops = this.dropRows
+                .filter((row) => row.lat !== null && row.lng !== null && row.lat !== '')
+                .map((row) => ({ lat: Number(row.lat), lng: Number(row.lng) }))
+                .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+            if (stops.length) {
+                const route = await fetchRoute([{ lat: this.coords.lat, lng: this.coords.lng }, ...stops]);
+                if (route) {
+                    estimateDistance = Math.round(route.distance);
+                    estimateTime = Math.round(route.duration);
+                }
+            }
+            const payload = {
+                booking_type: 1,
                 segment_id: this.segment.segment_id,
                 area: this.areaId,
                 service_type: this.activeService.id,
@@ -752,7 +846,12 @@ Alpine.data('bookingFlow', () => ({
                 pick_up_location: this.pickup,
                 total_drop_location: this.dropRows.length,
                 drop_location: dropPayload(this.dropRows),
-            });
+            };
+            if (estimateDistance !== null && estimateTime !== null) {
+                payload.estimate_distance = estimateDistance;
+                payload.estimate_time = estimateTime;
+            }
+            const r = await api.post('/api/user/checkout', payload);
             if (!r.ok) {
                 throw new Error(r.message || 'Could not calculate the estimate.');
             }
@@ -826,6 +925,16 @@ Alpine.data('activeBooking', () => ({
     reason_id: null,
     cancelling: false,
     tracker: null,
+    statusText(s) {
+        return statusText(s);
+    },
+    map: null,
+    mapTarget: null,
+    mapDriver: null,
+    mapLine: null,
+    mapFitted: false,
+    routeKey: '',
+    routeLoading: false,
     async init() {
         this.bookingId = window.bookingId || null;
         if (!this.bookingId) {
@@ -836,18 +945,136 @@ Alpine.data('activeBooking', () => ({
         try {
             await this.loadReasons();
         } catch (e) {}
-        const onOk = (data) => {
-            const b = data && (data.booking || data);
-            this.booking = b || this.booking;
+        const onOk = (res) => {
+            if (!res) return;
+            if (!res.ok) {
+                this.error = res.message || 'Live updates are unavailable right now.';
+                this.loading = false;
+                return;
+            }
+            this.error = '';
+            this.booking = res.data || {};
             this.loading = false;
-            if (this.isDone()) this.tracker && this.tracker.stop();
+            this.$nextTick(() => this.syncMap());
+            if (this.isDone() && this.tracker) this.tracker.stop();
         };
-        this.tracker = createBookingTracker(this.bookingId, onOk);
+        this.tracker = createBookingTracker({
+            bookingId: this.bookingId,
+            onPoll: onOk,
+            onError: () => {},
+        });
         this.tracker.start();
     },
     isDone() {
         const s = this.booking && this.booking.booking_status;
         return [1005, 1006, 1007, 1008].includes(Number(s));
+    },
+    targetLatLng() {
+        const m = this.booking && this.booking.stil_marker;
+        if (!m) return null;
+        const lat = parseFloat(m.marker_lat);
+        const lng = parseFloat(m.marker_long);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) return null;
+        return { lat, lng };
+    },
+    driverLatLng() {
+        const m = this.booking && this.booking.movable_marker_type;
+        if (!m) return null;
+        const lat = parseFloat(m.driver_marker_lat);
+        const lng = parseFloat(m.driver_marker_long);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) return null;
+        return { lat, lng };
+    },
+    driverBearing() {
+        return (this.booking && this.booking.movable_marker_type && this.booking.movable_marker_type.driver_marker_bearing) || 0;
+    },
+    liveEta() {
+        const u = this.booking && this.booking.location_updates;
+        return u ? u.eta || '' : '';
+    },
+    liveDistance() {
+        const u = this.booking && this.booking.location_updates;
+        return u ? u.distance || '' : '';
+    },
+    liveDriverName() {
+        const u = this.booking && this.booking.location_updates;
+        return u ? u.driver_full_name || '' : '';
+    },
+    liveVehicle() {
+        const u = this.booking && this.booking.location_updates;
+        if (!u) return '';
+        return [u.vehicle, u.vehicle_color].filter(Boolean).join(' · ');
+    },
+    liveVehicleNumber() {
+        const u = this.booking && this.booking.location_updates;
+        return u ? u.vehicle_number || '' : '';
+    },
+    headingTo() {
+        const l = this.booking && this.booking.location;
+        if (!l) return '';
+        return [l.location_headline, l.location_text].filter(Boolean).join(': ');
+    },
+    async syncMap() {
+        const el = this.$refs.map;
+        const target = this.targetLatLng();
+        const driver = this.driverLatLng();
+        if (!el || (!target && !driver)) return;
+
+        if (!this.map) {
+            this.map = createMap(el, {
+                center: target || driver,
+                zoom: 15,
+            });
+            setTimeout(() => this.map && this.map.invalidateSize(), 80);
+        }
+
+        if (target) {
+            const color = /drop/i.test((this.booking.stil_marker || {}).marker_type || '') ? '#E8562A' : '#287D1B';
+            const icon = makePin(color);
+            if (!this.mapTarget) {
+                this.mapTarget = L.marker([target.lat, target.lng], { icon }).addTo(this.map);
+            } else {
+                this.mapTarget.setLatLng([target.lat, target.lng]).setIcon(icon);
+            }
+        }
+
+        if (driver) {
+            const icon = makeCarIcon(this.driverBearing());
+            if (!this.mapDriver) {
+                this.mapDriver = L.marker([driver.lat, driver.lng], { icon, zIndexOffset: 500 }).addTo(this.map);
+            } else {
+                this.mapDriver.setLatLng([driver.lat, driver.lng]).setIcon(icon);
+            }
+        }
+
+        let points = decodePolyline(this.booking.polydata && this.booking.polydata.polyline);
+        if (!points.length && driver && target && !this.routeLoading) {
+            const key = [driver.lat, driver.lng, target.lat, target.lng].map((n) => n.toFixed(4)).join(',');
+            if (key !== this.routeKey) {
+                this.routeKey = key;
+                this.routeLoading = true;
+                const route = await fetchRoute(driver, target);
+                this.routeLoading = false;
+                if (route && route.coordinates.length) points = route.coordinates;
+            }
+        }
+        if (points.length) {
+            if (!this.mapLine) {
+                this.mapLine = L.polyline(points, { color: '#287D1B', weight: 5, opacity: 0.85 }).addTo(this.map);
+            } else {
+                this.mapLine.setLatLngs(points);
+            }
+        }
+
+        if (!this.mapFitted) {
+            const markers = [this.mapTarget, this.mapDriver].filter(Boolean);
+            if (markers.length === 1) {
+                this.map.setView(markers[0].getLatLng(), 15);
+            } else if (markers.length > 1) {
+                this.map.fitBounds(L.featureGroup(markers).getBounds().pad(0.25));
+            }
+            this.mapFitted = true;
+        }
     },
     async loadReasons() {
         const r = await api.post('/api/user/cancel-reasons');
@@ -943,6 +1170,9 @@ Alpine.data('bookingDetail', () => ({
     booking: null,
     loading: true,
     error: '',
+    statusText(s) {
+        return statusText(s);
+    },
     async init() {
         this.bookingId = window.bookingId || null;
         if (!this.bookingId) {

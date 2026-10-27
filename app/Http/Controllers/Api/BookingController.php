@@ -4738,6 +4738,7 @@ class BookingController extends Controller
             }
         } catch (Exception $e) {
             DB::rollback();
+            \Log::error('CHECKOUT_FAIL: '.$e->getMessage()."\n".$e->getTraceAsString());
             return $this->failedResponse($e->getMessage());
         }
         DB::commit();

@@ -1139,7 +1139,7 @@ class Driver extends Authenticatable
                             ->leftJoin('driver_downgraded_vehicle_types as ddvt', 'drivers.id', '=', 'ddvt.driver_id');
                         // dd($query->get());
                         if ($ride_later_ride_allocation != 2) {
-                            $query->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( current_latitude ) ) * cos( radians( current_longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( current_latitude ) ) ) ) AS distance,drivers.id AS driver_id'));
+                            $query->addSelect(DB::raw('( ' . $radius . ' * acos( cos( radians(' . $latitude . ') ) * cos( radians( CAST(current_latitude AS DECIMAL(10,7)) ) ) * cos( radians( CAST(current_longitude AS DECIMAL(10,7)) ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( CAST(current_latitude AS DECIMAL(10,7)) ) ) ) ) AS distance,drivers.id AS driver_id'));
                         } else {
                             $query->addSelect(DB::raw('drivers.id AS driver_id'));
                         }
@@ -1289,7 +1289,15 @@ class Driver extends Authenticatable
                         }
 
                         if ($ride_later_ride_allocation != 2) {
-                            $query->having('distance', '<', $distance)->orderBy('distance')->take($limit);
+                            if (DB::connection()->getDriverName() === 'pgsql') {
+                                $query = Driver::fromSub($query, 'ranked_drivers')
+                                    ->select('ranked_drivers.*')
+                                    ->where('distance', '<', $distance)
+                                    ->orderBy('distance')
+                                    ->take($limit);
+                            } else {
+                                $query->having('distance', '<', $distance)->orderBy('distance')->take($limit);
+                            }
                         } else {
                             $query->take($limit);
                         }

@@ -55,17 +55,17 @@ function setS3Config($merchant)
     }
 
     $file_system = json_decode($merchant->file_system_config, true);
-    if(empty($file_system)){
-        abort(409);
+    if (empty($file_system['s3']['region']) || empty($file_system['s3']['access_key']) || empty($file_system['s3']['bucket'])) {
+        return;
     }
     $s3 = $file_system['s3'];
     $s3Data = [
-        'driver' => $s3['driver'],
+        'driver' => $s3['driver'] ?? 's3',
         'key' => $s3['access_key'],
-        'secret' => $s3['secret_key'],
+        'secret' => $s3['secret_key'] ?? null,
         'region' => $s3['region'],
         'bucket' => $s3['bucket'],
-        'url' => $s3['url'],
+        'url' => $s3['url'] ?? null,
     ];
     \Config::set('filesystems.disks.s3', $s3Data);
 }
@@ -105,6 +105,24 @@ function get_image($file_name = '', $custom_key = '', $merchant_id = NULL, $merc
 
     if ($config_cdn && $config_cdn->working_with_cdn == 1) {
         return rtrim($config_cdn->cloudflare_cdn_url, '/') . '/' . ltrim($return_file, '/');
+    }
+
+    if (empty(\Config::get('filesystems.disks.s3.region')) || empty(\Config::get('filesystems.disks.s3.key')) || empty(\Config::get('filesystems.disks.s3.bucket'))) {
+        $candidates = [];
+        if (!empty($return_file)) {
+            $candidates[] = public_path(ltrim($return_file, '/'));
+            $candidates[] = public_path('storage/' . ltrim($return_file, '/'));
+            if (!empty($file_name)) {
+                $candidates[] = public_path('basic-images/' . basename($file_name));
+            }
+        }
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                $relative = str_replace('\\', '/', substr($candidate, strlen(public_path()) + 1));
+                return '/' . ltrim($relative, '/');
+            }
+        }
+        return '/static-images/no-image.svg';
     }
 
     // return simple url
@@ -1322,12 +1340,28 @@ function get_merchant_notification_provider($merchant_id = null, $id = null, $ty
             }
         }
         if ($return == 'full') {
-            $return = $merchant->Onesignal;
+            $return = $merchant->Onesignal ?: (\App\Models\DefaultOnesignal::first() ?: new stdClass);
         } else {
             $return = new stdClass;
         }
-        $return->fire_base = $fire_base;
-        $return->push_notification_provider = $notification_provider;
+        if (!isset($return->fire_base)) {
+            $return->fire_base = $fire_base ?? false;
+        }
+        if (!isset($return->push_notification_provider)) {
+            $return->push_notification_provider = $notification_provider ?? 'onesignal';
+        }
+        if (!isset($return->driver_application_key)) {
+            $return->driver_application_key = $return->driver_app_id ?? $return->app_id ?? null;
+        }
+        if (!isset($return->driver_rest_api_key)) {
+            $return->driver_rest_api_key = $return->driver_rest_key ?? $return->rest_api_key ?? null;
+        }
+        if (!isset($return->user_application_key)) {
+            $return->user_application_key = $return->user_app_id ?? $return->app_id ?? null;
+        }
+        if (!isset($return->user_rest_api_key)) {
+            $return->user_rest_api_key = $return->user_rest_key ?? $return->rest_api_key ?? null;
+        }
         return $return;
     }
 }

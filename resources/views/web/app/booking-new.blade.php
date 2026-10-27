@@ -74,7 +74,13 @@
                     </div>
                 </div>
 
-                {{-- services & vehicles --}}
+                {{-- route preview (OpenStreetMap + OSRM, no API key) --}}
+                <div class="card overflow-hidden p-0" x-show="coords">
+                    <div x-ref="previewMap" class="h-52 w-full bg-slate-100 dark:bg-slate-800"></div>
+                    <p class="px-4 py-2.5 text-xs font-medium text-slate-500 dark:text-slate-400"
+                       x-show="previewInfo" x-text="previewInfo"></p>
+                </div>
+
                 <div class="card">
                     <h2 class="text-base font-bold text-slate-900 dark:text-white">Choose a service</h2>
 

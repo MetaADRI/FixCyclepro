@@ -27,52 +27,55 @@
 
         <template x-if="booking">
             <div class="space-y-5">
+                <div class="card overflow-hidden p-0">
+                    <div x-ref="map" class="h-64 w-full bg-slate-100 dark:bg-slate-800"></div>
+                    <div class="flex items-start justify-between gap-3 px-4 py-3">
+                        <div class="min-w-0">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">Heading to</p>
+                            <p class="truncate text-sm font-semibold" x-text="headingTo() || 'Live location'"></p>
+                        </div>
+                        <a x-show="targetLatLng()"
+                           :href="'https://www.openstreetmap.org/?mlat=' + (targetLatLng()?.lat || '') + '&mlon=' + (targetLatLng()?.lng || '') + '#map=16/' + (targetLatLng()?.lat || '') + '/' + (targetLatLng()?.lng || '')"
+                           target="_blank" rel="noopener"
+                           class="btn-ghost shrink-0 text-xs">Open map</a>
+                    </div>
+                </div>
+
                 <div class="card space-y-4">
                     <div class="flex items-center justify-between">
                         <span class="chip chip-active" x-text="statusText(booking.booking_status)"></span>
-                        <span x-show="booking.merchant_booking_id" class="text-xs font-semibold text-slate-400">
-                            ID #<span x-text="booking.merchant_booking_id"></span>
+                        <span class="text-xs font-semibold text-slate-400">
+                            Booking #<span x-text="bookingId"></span>
                         </span>
                     </div>
 
-                    <div x-show="booking.pickup_location" class="flex items-start gap-3">
-                        <svg class="mt-0.5 h-5 w-5 shrink-0 brand-text" aria-hidden="true"><use href="#i-pin"/></svg>
-                        <div class="min-w-0">
-                            <p class="text-xs uppercase tracking-wide text-slate-400">Pickup</p>
-                            <p class="truncate text-sm font-semibold" x-text="booking.pickup_location"></p>
+                    <div class="grid grid-cols-2 gap-3" x-show="liveEta() || liveDistance()">
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">ETA</p>
+                            <p class="text-sm font-bold" x-text="liveEta() || '—'"></p>
                         </div>
-                    </div>
-                    <div x-show="booking.drop_location" class="flex items-start gap-3">
-                        <svg class="mt-0.5 h-5 w-5 shrink-0 accent-text" aria-hidden="true"><use href="#i-navigation"/></svg>
-                        <div class="min-w-0">
-                            <p class="text-xs uppercase tracking-wide text-slate-400">Drop-off</p>
-                            <p class="truncate text-sm font-semibold" x-text="booking.drop_location"></p>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">Distance</p>
+                            <p class="text-sm font-bold" x-text="liveDistance() || '—'"></p>
                         </div>
                     </div>
                 </div>
 
-                <template x-if="booking.driver">
+                <template x-if="liveDriverName()">
                     <div class="card space-y-3">
                         <div class="flex items-center gap-3">
-                            <template x-if="booking.driver.profile_image">
-                                <img :src="booking.driver.profile_image" alt="" class="h-12 w-12 rounded-full object-cover" loading="lazy">
+                            <template x-if="booking.location_updates && booking.location_updates.driver_image">
+                                <img :src="booking.location_updates.driver_image" alt="" class="h-12 w-12 rounded-full object-cover" loading="lazy">
                             </template>
-                            <template x-if="!booking.driver.profile_image">
+                            <template x-if="!booking.location_updates || !booking.location_updates.driver_image">
                                 <span class="brand-bg brand-contrast flex h-12 w-12 items-center justify-center rounded-full text-base font-bold uppercase"
-                                      x-text="((booking.driver.first_name || '') + ' ' + (booking.driver.last_name || '')).trim() || 'D'"></span>
+                                      x-text="liveDriverName().charAt(0) || 'D'"></span>
                             </template>
                             <div class="min-w-0 flex-1">
-                                <p class="truncate font-bold" x-text="(booking.driver.first_name || '') + ' ' + (booking.driver.last_name || '')"></p>
-                                <p class="text-sm text-slate-500">
-                                    <span x-text="booking.driver.rating ?? '—'"></span>
-                                    <svg class="mb-0.5 inline h-4 w-4 text-amber-400" aria-hidden="true"><use href="#i-star"/></svg>
-                                </p>
+                                <p class="truncate font-bold" x-text="liveDriverName()"></p>
+                                <p class="text-sm text-slate-500" x-text="liveVehicle()"></p>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" x-text="liveVehicleNumber()"></p>
                             </div>
-                            <a x-show="booking.driver.phoneNumber"
-                               :href="'tel:' + booking.driver.phoneNumber"
-                               class="btn-ghost flex h-11 w-11 items-center justify-center rounded-2xl">
-                                <svg class="h-5 w-5" aria-hidden="true"><use href="#i-phone"/></svg>
-                            </a>
                         </div>
                     </div>
                 </template>
