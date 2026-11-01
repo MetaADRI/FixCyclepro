@@ -9,40 +9,70 @@ use Illuminate\Support\Facades\Cache;
 
 class GoogleController extends Controller
 {
-    public static function GoogleStaticImageAndDistance($pickuplat = null, $pickuplong = null, array $drop = null, $key = null, $units = 'metric',$string_file = "")
+    public static function GoogleStaticImageAndDistance($pickuplat = null, $pickuplong = null, $drop = null, $key = null, $units = 'metric',$string_file = "")
     {
        try{
-           $start = $pickuplat . ',' . $pickuplong;
-           $units = !empty($units) ? $units : 'metric';
-           if (!empty($drop)):
-               $count_combine = count($drop); //CHECK FOR SINGLE DROP or MULTIPLE DROP
-               if ($count_combine > 1): // IF MULTIPLE DROP
-                   $end = array_shift($drop); // fetch first element of the array, because zero element hold drop location value
-                   $finish = $end['drop_latitude'] . ',' . $end['drop_longitude'];
-                   $count_waypoints = count($drop); // CHECK FOR MULTIPLE WAYPOINTS or SINGLE WAYPOINT
-                   if ($count_waypoints > 1):   // IF MULTIPLE WAYPOINTS
-                       $multiple_waypoints = array();
-                       for ($j = 0; $j < $count_waypoints; $j++) {
-                           $lat_long = $drop[$j]['drop_latitude'] . ',' . $drop[$j]['drop_longitude'];
-                           $multiple_waypoints[] = $lat_long;
-                       }
-                       $waypoints = implode("|", $multiple_waypoints);
-                   else:   // IF SINGLE WAYPOINT
-                       $waypoints = $drop[0]['drop_latitude'] . ',' . $drop[0]['drop_longitude'];
-                   endif;
-                   return self::GoogleStaticMultiplePointsImage($start, $finish, $waypoints, $key, $units,$string_file);
-               else:   // IF SINGLE DROP
-                   $end = array_pop($drop);
-                   $finish = $end['drop_latitude'] . ',' . $end['drop_longitude'];
-                   return self::GooglestaticsinglePointImage($start, $finish, $key, $units,2,'no',$string_file);
-               endif;
-           else:   // IF NO DROP LOCATION RECEIVED
-               return self::GoogleStaticNoDropImage($start, $key);
-           endif;
-       }catch (\Exception $e)
-       {
-           throw new \Exception($e->getMessage());
-       }
+            $start = $pickuplat . ',' . $pickuplong;
+            $units = !empty($units) ? $units : 'metric';
+            if (is_array($drop) && !empty($drop)):
+                $drop = array_values($drop);
+                $count_combine = count($drop); //CHECK FOR SINGLE DROP or MULTIPLE DROP
+                if ($count_combine > 1): // IF MULTIPLE DROP
+                    $end = array_shift($drop); // fetch first element of the array, because zero element hold drop location value
+                    if (!is_array($end)) { $end = []; }
+                    $finish_lat = $end['drop_latitude'] ?? ($end['latitude'] ?? ($end['lat'] ?? $pickuplat));
+                    $finish_lng = $end['drop_longitude'] ?? ($end['longitude'] ?? ($end['lng'] ?? $pickuplong));
+                    $finish = $finish_lat . ',' . $finish_lng;
+                    $count_waypoints = count($drop); // CHECK FOR MULTIPLE WAYPOINTS or SINGLE WAYPOINT
+                    if ($count_waypoints > 1):   // IF MULTIPLE WAYPOINTS
+                        $multiple_waypoints = array();
+                        for ($j = 0; $j < $count_waypoints; $j++) {
+                            $wp = $drop[$j] ?? [];
+                            if (!is_array($wp)) { continue; }
+                            $lat_long = ($wp['drop_latitude'] ?? ($wp['latitude'] ?? '')) . ',' . ($wp['drop_longitude'] ?? ($wp['longitude'] ?? ''));
+                            if ($lat_long != ',') {
+                                $multiple_waypoints[] = $lat_long;
+                            }
+                        }
+                        $waypoints = implode("|", $multiple_waypoints);
+                    else:   // IF SINGLE WAYPOINT
+                        $wp0 = $drop[0] ?? [];
+                        if (!is_array($wp0)) { $wp0 = []; }
+                        $waypoints = ($wp0['drop_latitude'] ?? ($wp0['latitude'] ?? '')) . ',' . ($wp0['drop_longitude'] ?? ($wp0['longitude'] ?? ''));
+                    endif;
+                    if (empty($waypoints) || $waypoints == ',') {
+                        return self::GooglestaticsinglePointImage($start, $finish, $key, $units,2,'no',$string_file);
+                    }
+                    return self::GoogleStaticMultiplePointsImage($start, $finish, $waypoints, $key, $units,$string_file);
+                else:   // IF SINGLE DROP
+                    $end = array_pop($drop);
+                    if (!is_array($end)) { $end = []; }
+                    $finish_lat = $end['drop_latitude'] ?? ($end['latitude'] ?? ($end['lat'] ?? null));
+                    $finish_lng = $end['drop_longitude'] ?? ($end['longitude'] ?? ($end['lng'] ?? null));
+                    if (empty($finish_lat) || empty($finish_lng)) {
+                        return self::GoogleStaticNoDropImage($start, $key);
+                    }
+                    $finish = $finish_lat . ',' . $finish_lng;
+                    return self::GooglestaticsinglePointImage($start, $finish, $key, $units,2,'no',$string_file);
+                endif;
+            else:   // IF NO DROP LOCATION RECEIVED
+                return self::GoogleStaticNoDropImage($start, $key);
+            endif;
+        }catch (\Throwable $e)
+        {
+            try {
+                return [
+                    'image' => '',
+                    'total_distance' => 0,
+                    'total_time' => 0,
+                    'total_time_minutes' => 0,
+                    'total_time_text' => '0 min',
+                    'total_distance_text' => '0'
+                ];
+            } catch (\Throwable $_e) {
+                throw new \Exception($e->getMessage());
+            }
+        }
     }
 
     public static function GoogleStaticMultiplePointsImage($startpoint = null, $finishpoint = null, $waypoints = null, $key = null, $units = null,$string_file = "")

@@ -1351,16 +1351,16 @@ function get_merchant_notification_provider($merchant_id = null, $id = null, $ty
             $return->push_notification_provider = $notification_provider ?? 'onesignal';
         }
         if (!isset($return->driver_application_key)) {
-            $return->driver_application_key = $return->driver_app_id ?? $return->app_id ?? null;
+            $return->driver_application_key = $return->driver_app_id ?? $return->app_id ?? ($return->application_key ?? null);
         }
         if (!isset($return->driver_rest_api_key)) {
-            $return->driver_rest_api_key = $return->driver_rest_key ?? $return->rest_api_key ?? null;
+            $return->driver_rest_api_key = $return->driver_rest_key ?? $return->rest_api_key ?? ($return->rest_key ?? ($return->server_key ?? null));
         }
         if (!isset($return->user_application_key)) {
-            $return->user_application_key = $return->user_app_id ?? $return->app_id ?? null;
+            $return->user_application_key = $return->user_app_id ?? $return->app_id ?? ($return->user_app_key ?? ($return->application_key ?? null));
         }
         if (!isset($return->user_rest_api_key)) {
-            $return->user_rest_api_key = $return->user_rest_key ?? $return->rest_api_key ?? null;
+            $return->user_rest_api_key = $return->user_rest_key ?? $return->rest_api_key ?? ($return->user_rest_key_id ?? null);
         }
         return $return;
     }

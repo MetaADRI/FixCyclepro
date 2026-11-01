@@ -417,9 +417,9 @@ class Onesignal extends Model
         }
         elseif($notification_for == "driver")
         {
-            $application_key = $detail->driver_application_key;
-            $rest_key = $detail->driver_rest_key;
-            $channel_id = $detail->driver_channel_id;
+            $application_key = $detail->driver_application_key ?? ($detail->driver_app_id ?? ($detail->app_id ?? null));
+            $rest_key = $detail->driver_rest_key ?? ($detail->driver_rest_api_key ?? ($detail->rest_api_key ?? ($detail->rest_key ?? null)));
+            $channel_id = $detail->driver_channel_id ?? ($detail->driver_notification_channel_id ?? ($detail->channel_id ?? null));
             $data['segment_sub_group'] = isset($data['segment_sub_group']) ? $data['segment_sub_group'] :  "NA";
             $data['segment_group_id'] = isset($data['segment_group_id']) ? $data['segment_group_id'] :  "NA";
         }

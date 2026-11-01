@@ -2130,9 +2130,21 @@ class BookingController extends Controller
             throw new Exception($errors[0]);
         }
 
-        DB::beginTransaction();
         try {
-            $accepted_driver_count = BookingRequestDriver::where([['booking_id', '=', $booking_id], ['request_status', '=', 2]])->lockForUpdate()->count();
+            try { DB::rollBack(); } catch (\Throwable $_e) {}
+            DB::beginTransaction();
+        } catch (\Throwable $e) {
+            try { DB::rollBack(); } catch (\Throwable $_e) {}
+            DB::beginTransaction();
+        }
+        try {
+            try {
+                $accepted_driver_count = BookingRequestDriver::where([['booking_id', '=', $booking_id], ['request_status', '=', 2]])->lockForUpdate()->count();
+            } catch (\Throwable $e) {
+                try { DB::rollBack(); } catch (\Throwable $_e) {}
+                try { DB::beginTransaction(); } catch (\Throwable $_e2) {}
+                $accepted_driver_count = BookingRequestDriver::where([['booking_id', '=', $booking_id], ['request_status', '=', 2]])->count();
+            }
             if ($accepted_driver_count > 0) {
                 throw new Exception(trans("$string_file.ride_already"));
             }
@@ -2140,7 +2152,7 @@ class BookingController extends Controller
             //            $booking = $booking_obj->getBooking($booking_id);
 
 
-            $booking = Booking::select('id', 'card_id','payment_intent_id', 'is_in_drive', 'offer_amount', 'user_id', 'final_amount_paid', 'family_member_id', 'booking_status_history', 'estimate_driver_distance', 'estimate_distance', 'travel_distance', 'merchant_booking_id', 'booking_status', 'vehicle_type_id', 'driver_vehicle_id', 'price_card_id', 'ride_otp', 'ride_otp_verify', 'total_drop_location', 'booking_type', 'ploy_points', 'payment_method_id', 'vehicle_type_id', 'driver_id', 'merchant_id', 'segment_id', 'pickup_location', 'country_area_id', 'driver_id', 'user_id', 'pickup_latitude', 'pickup_longitude', 'service_type_id', 'additional_notes', 'family_member_id', 'waypoints', 'drop_latitude', 'drop_longitude', 'drop_location', 'payment_status', 'estimate_bill', 'travel_time', 'country_area_id', 'booking_closure', 'later_booking_date', 'later_booking_time', 'unique_id', 'map_image', 'platform', 'user_masked_number', 'driver_masked_number', 'number_of_rider', 'is_pass_ride', 'pass_booking_id')
+            $bookingQuery = Booking::select('id', 'card_id','payment_intent_id', 'is_in_drive', 'offer_amount', 'user_id', 'final_amount_paid', 'family_member_id', 'booking_status_history', 'estimate_driver_distance', 'estimate_distance', 'travel_distance', 'merchant_booking_id', 'booking_status', 'vehicle_type_id', 'driver_vehicle_id', 'price_card_id', 'ride_otp', 'ride_otp_verify', 'total_drop_location', 'booking_type', 'ploy_points', 'payment_method_id', 'vehicle_type_id', 'driver_id', 'merchant_id', 'segment_id', 'pickup_location', 'country_area_id', 'driver_id', 'user_id', 'pickup_latitude', 'pickup_longitude', 'service_type_id', 'additional_notes', 'family_member_id', 'waypoints', 'drop_latitude', 'drop_longitude', 'drop_location', 'payment_status', 'estimate_bill', 'travel_time', 'country_area_id', 'booking_closure', 'later_booking_date', 'later_booking_time', 'unique_id', 'map_image', 'platform', 'user_masked_number', 'driver_masked_number', 'number_of_rider', 'is_pass_ride', 'pass_booking_id')
                 ->with(['User' => function ($query) {
                     $query->select('id', 'country_id', 'merchant_id', 'first_name', 'last_name', 'UserPhone', 'email', 'rating', 'UserProfileImage', 'rating');
                 }])
@@ -2156,8 +2168,14 @@ class BookingController extends Controller
                 ->with(['ServiceType' => function ($query) {
                     $query->select('id', 'serviceName', 'type');
                 }])
-                ->orderBy('created_at', 'DESC')
-                ->lockForUpdate()->find($booking_id);
+                ->orderBy('created_at', 'DESC');
+            try {
+                $booking = $bookingQuery->lockForUpdate()->find($booking_id);
+            } catch (\Throwable $e) {
+                try { DB::rollBack(); } catch (\Throwable $_e) {}
+                try { DB::beginTransaction(); } catch (\Throwable $_e2) {}
+                $booking = $bookingQuery->find($booking_id);
+            }
 
             // status == 1 means accept request
             if ($request->status == "ACCEPT") {
