@@ -104,8 +104,46 @@ Alpine.store('theme', {
     primary: '#287D1B',
     accent: '#F26C00',
     logo: null,
+    darkLogo: null,
     currency: currency(),
     currencySymbol: currencySymbol(),
+    mode: localStorage.getItem('fixcycle_theme_mode') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+    init() {
+        this.apply();
+        if (window.matchMedia) {
+            const mq = window.matchMedia('(prefers-color-scheme: dark)');
+            const onChange = (event) => {
+                if (localStorage.getItem('fixcycle_theme_mode')) return;
+                this.mode = event.matches ? 'dark' : 'light';
+                this.apply();
+            };
+            if (mq.addEventListener) mq.addEventListener('change', onChange);
+            else if (mq.addListener) mq.addListener(onChange);
+        }
+        window.addEventListener('pageshow', () => this.apply());
+    },
+    apply() {
+        const dark = this.mode === 'dark';
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+    },
+    toggle() {
+        this.mode = this.mode === 'dark' ? 'light' : 'dark';
+        this.apply();
+        localStorage.setItem('fixcycle_theme_mode', this.mode);
+    },
+    syncLogos() {
+        if (this.logo) {
+            document.querySelectorAll('[data-logo="light"]').forEach((img) => {
+                img.src = this.logo;
+            });
+        }
+        if (this.darkLogo) {
+            document.querySelectorAll('[data-logo="dark"]').forEach((img) => {
+                img.src = this.darkLogo;
+            });
+        }
+    },
     applyBrandedClass() {
         const rgb = hexToRgb(this.accent);
         if (rgb) {
@@ -133,26 +171,19 @@ Alpine.store('theme', {
                     color
                 );
             }
-            if (themeConfig.user_app_logo) {
-                this.logo = themeConfig.user_app_logo;
-                const img = document.getElementById('web-logo');
-                const fb = document.getElementById('web-logo-fallback');
-                if (img && fb) {
-                    img.src = themeConfig.user_app_logo;
-                    img.onerror = () => {
-                        img.style.display = 'none';
-                        fb.style.display = 'flex';
-                    };
-                    img.style.display = '';
-                    fb.style.display = 'none';
-                }
+            if (themeConfig.user_app_logo) this.logo = themeConfig.user_app_logo;
+            if (themeConfig.user_app_logo_dark || themeConfig.logo_dark || themeConfig.dark_logo) {
+                this.darkLogo = themeConfig.user_app_logo_dark || themeConfig.logo_dark || themeConfig.dark_logo;
             }
+            this.syncLogos();
             if (themeConfig.accent_color) this.accent = themeConfig.accent_color;
             if (themeConfig.currency) this.currency = themeConfig.currency;
             if (themeConfig.currency_symbol) this.currencySymbol = themeConfig.currency_symbol;
             this.applyBrandedClass();
+            this.apply();
         } catch (e) {
             /* keep defaults */
+            this.apply();
         }
     },
 });
@@ -1368,4 +1399,6 @@ Alpine.start();
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
-Alpine.store('theme').load?.();
+if (location.pathname === '/app' || location.pathname.startsWith('/app/')) {
+    Alpine.store('theme').load?.();
+}

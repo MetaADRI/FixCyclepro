@@ -12,6 +12,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/fixcycle-icon-192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/fixcycle-icon-512.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/fixcycle-apple-touch.png') }}">
+    @include('web.partials.theme-init')
     @if (file_exists(public_path('build/manifest.json')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else
@@ -23,11 +24,16 @@
 
     <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
         <a href="/" class="flex items-center gap-2.5" aria-label="{{ config('app.name', 'Fixcycle') }}">
-            <img src="{{ asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-16 w-16 object-contain">
+            <img data-logo="light" src="{{ asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-12 w-12 object-contain dark:hidden sm:h-16 sm:w-16">
+            <img data-logo="dark" src="{{ asset('images/fixcycle-logo-dark.png') }}" alt="" aria-hidden="true" class="hidden h-12 w-12 object-contain dark:block sm:h-16 sm:w-16">
         </a>
-        <nav class="flex items-center gap-3 text-sm font-semibold">
-            <a href="/login" class="btn-ghost px-4 py-2">Sign in</a>
-            <a href="/signup" class="btn-primary px-4 py-2">Get started</a>
+        <nav class="flex items-center gap-1.5 text-sm font-semibold sm:gap-3">
+            <button type="button" class="btn-ghost h-10 w-10 !min-h-0 !min-w-0 rounded-xl !p-0" x-data @click="Alpine.store('theme').toggle()" :aria-pressed="Alpine.store('theme').mode === 'dark'" aria-label="Toggle dark mode">
+                <svg class="h-5 w-5 dark:hidden" aria-hidden="true"><use href="#i-moon"/></svg>
+                <svg class="hidden h-5 w-5 dark:block" aria-hidden="true"><use href="#i-sun"/></svg>
+            </button>
+            <a href="/login" class="btn-ghost px-3 py-2 sm:px-4">Sign in</a>
+            <a href="/signup" class="btn-primary px-3 py-2 sm:px-4">Get started</a>
         </nav>
     </header>
 

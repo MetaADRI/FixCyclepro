@@ -14,6 +14,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/fixcycle-icon-192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/fixcycle-icon-512.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/fixcycle-apple-touch.png') }}">
+    @include('web.partials.theme-init')
     @include('web.partials.config')
     @if (file_exists(public_path('build/manifest.json')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -30,11 +31,8 @@
         {{-- Desktop sidebar --}}
         <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 lg:flex">
             <a href="/" class="flex items-center gap-3 px-6 py-5" aria-label="{{ config('app.name', 'Fixcycle') }} home">
-                <img id="web-logo" src="{{ $logo ?? asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-12 w-12 object-contain"
-                     onerror="this.style.display='none';document.getElementById('web-logo-fallback').style.display='flex';">
-                <span id="web-logo-fallback" class="brand-bg brand-contrast hidden items-center justify-center rounded-xl px-2.5 py-1 text-lg font-extrabold" style="display:none">
-                    {{ substr(config('app.name', 'Fixcycle'), 0, 2) }}
-                </span>
+                <img data-logo="light" src="{{ ($logo ?? null) ?: asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-12 w-12 object-contain dark:hidden">
+                <img data-logo="dark" src="{{ asset('images/fixcycle-logo-dark.png') }}" alt="" aria-hidden="true" class="hidden h-12 w-12 object-contain dark:block">
             </a>
             <nav class="flex-1 space-y-1 px-3 py-2" aria-label="Main">
                 <template x-for="item in nav" :key="item.path">
@@ -44,7 +42,12 @@
                     </a>
                 </template>
             </nav>
-            <div class="border-t border-slate-200 px-6 py-4 dark:border-slate-700">
+            <div class="border-t border-slate-200 px-6 py-4 dark:border-slate-700 space-y-3">
+                <button type="button" class="btn-ghost w-full justify-between" @click="Alpine.store('theme').toggle()" x-data :aria-pressed="Alpine.store('theme').mode === 'dark'">
+                    <span x-text="Alpine.store('theme').mode === 'dark' ? 'Light mode' : 'Dark mode'"></span>
+                    <svg class="h-5 w-5 dark:hidden" aria-hidden="true"><use href="#i-moon"/></svg>
+                    <svg class="hidden h-5 w-5 dark:block" aria-hidden="true"><use href="#i-sun"/></svg>
+                </button>
                 <div class="flex items-center gap-3" x-data="auth">
                     <template x-if="isLoggedIn">
                         <div class="flex items-center gap-3">
@@ -66,7 +69,18 @@
 
         {{-- Main column --}}
         <div class="flex min-h-screen w-full flex-col lg:pl-64">
-            <main class="flex-1">
+            <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 lg:hidden">
+                <a href="/" class="flex items-center gap-2" aria-label="{{ config('app.name', 'Fixcycle') }} home">
+                    <img data-logo="light" src="{{ ($logo ?? null) ?: asset('images/fixcycle-logo.png') }}" alt="{{ config('app.name', 'Fixcycle') }}" class="h-9 w-9 object-contain dark:hidden">
+                    <img data-logo="dark" src="{{ asset('images/fixcycle-logo-dark.png') }}" alt="" aria-hidden="true" class="hidden h-9 w-9 object-contain dark:block">
+                    <span class="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">{{ config('app.name', 'Fixcycle') }}</span>
+                </a>
+                <button type="button" class="btn-ghost h-10 w-10 !min-h-0 !min-w-0 rounded-xl !p-0" x-data @click="Alpine.store('theme').toggle()" :aria-pressed="Alpine.store('theme').mode === 'dark'" aria-label="Toggle dark mode">
+                    <svg class="h-5 w-5 dark:hidden" aria-hidden="true"><use href="#i-moon"/></svg>
+                    <svg class="hidden h-5 w-5 dark:block" aria-hidden="true"><use href="#i-sun"/></svg>
+                </button>
+            </header>
+            <main class="flex-1 pb-24 lg:pb-0">
                 {{ $slot }}
             </main>
 
