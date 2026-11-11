@@ -77,3 +77,15 @@ services:
     dockerCommand: php artisan queue:work --tries=3 --sleep=3
     envVars:
       - fromGroup: fixcycle-config
+
+  # Runs the 30-day account purge daily. Render cron uses UTC, matching the
+  # Kernel schedule (dailyAt 03:00). Runs the command directly instead of
+  # schedule:run every minute to avoid spinning a container per minute.
+  - type: cron
+    name: fixcycle-account-purge
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    schedule: "0 3 * * *"
+    dockerCommand: php artisan accounts:purge-deleted
+    envVars:
+      - fromGroup: fixcycle-config
