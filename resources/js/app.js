@@ -81,8 +81,12 @@ Alpine.store('auth', {
             this.loading = false;
         }
     },
-    logout() {
-        clearSession();
+    async logout() {
+        try {
+            await api.logout();
+        } catch (e) {
+            /* api.logout() already clears the session */
+        }
         this.user = null;
         location.href = '/login';
     },
@@ -218,7 +222,9 @@ Alpine.data('loginScreen', () => ({
     error: '',
     notice: new URLSearchParams(location.search).get('registered')
         ? 'Account created. Sign in to continue.'
-        : '',
+        : (new URLSearchParams(location.search).get('deleted')
+            ? 'Account deletion scheduled. Sign in within 30 days to cancel the deletion.'
+            : ''),
     async submit() {
         this.error = '';
         if (!this.email || !this.password) {
@@ -231,6 +237,9 @@ Alpine.data('loginScreen', () => ({
             if (!r.ok) {
                 this.error = r.message || 'Login failed';
                 return;
+            }
+            if (r.data && r.data.account_deletion_cancelled) {
+                toast('Welcome back — account deletion cancelled.');
             }
             await Alpine.store('auth').bootstrap();
             location.href = '/app';
@@ -383,7 +392,18 @@ Alpine.data('signupScreen', () => ({
         this.loading = true;
         try {
             const dial = this.country.dial || '';
-            const phone = dial + String(this.phone).replace(/^0+/, '').replace(/\s+/g, '');
+            const dialDigits = dial.replace(/[^\d]/g, '');
+            const raw = String(this.phone).replace(/[\s()-]/g, '');
+            let local = raw;
+            if (raw.startsWith('+' + dialDigits)) {
+                /* user already typed the full international number */
+                local = raw.slice(1 + dialDigits.length);
+            } else if (raw.startsWith('00' + dialDigits)) {
+                local = raw.slice(2 + dialDigits.length);
+            } else {
+                local = local.replace(/^\+/, '').replace(/^0+/, '');
+            }
+            const phone = dial + local;
             const first_name =
                 this.first_name.trim() ||
                 (this.email.includes('@') ? this.email.split('@')[0] : 'Customer');
@@ -1346,6 +1366,99 @@ Alpine.data('profileScreen', () => ({
         api.logout().then(() => {
             location.href = '/login';
         });
+    },
+
+    /* ---------- edit profile ---------- */
+    editing: false,
+    saving: false,
+    editError: '',
+    form: { first_name: '', last_name: '', email: '', phone: '' },
+    startEdit() {
+        const u = this.user || {};
+        const code = String(u.phone_code || '').replace('+', '');
+        const local = String(u.UserPhone || '').replace(/[^0-9]/g, '');
+        this.form = {
+            first_name: u.first_name || '',
+            last_name: u.last_name || '',
+            email: u.email || '',
+            phone: code ? '+' + code + local : local,
+        };
+        this.editError = '';
+        this.editing = true;
+    },
+    async saveEdit() {
+        this.editError = '';
+        if (!this.form.first_name.trim()) {
+            this.editError = 'First name is required.';
+            return;
+        }
+        const digits = this.form.phone.replace(/[^0-9]/g, '');
+        if (!digits) {
+            this.editError = 'Phone number is required.';
+            return;
+        }
+        this.saving = true;
+        try {
+            const code = String((this.user && this.user.phone_code) || '').replace('+', '');
+            const r = await api.post('/api/user/edit-profile', {
+                first_name: this.form.first_name.trim(),
+                last_name: this.form.last_name.trim(),
+                email: this.form.email.trim(),
+                phone: (code ? '+' + code : '') + digits,
+            });
+            if (!r.ok) {
+                this.editError = r.message || 'Could not save profile.';
+                return;
+            }
+            this.user = r.data;
+            this.editing = false;
+            toast('Profile updated');
+        } catch (e) {
+            this.editError = e.message || 'Could not save profile.';
+        } finally {
+            this.saving = false;
+        }
+    },
+
+    /* ---------- delete account ---------- */
+    deleteModal: false,
+    deletePassword: '',
+    deleteReason: '',
+    deleting: false,
+    deleteError: '',
+    deletionScheduled: false,
+    deletionDate: '',
+    async requestDeletion() {
+        this.deleteError = '';
+        if (!this.deletePassword) {
+            this.deleteError = 'Enter your password to confirm.';
+            return;
+        }
+        this.deleting = true;
+        try {
+            const r = await api.post('/api/user/account/delete-request', {
+                password: this.deletePassword,
+                account_cancel_reason: this.deleteReason.trim(),
+            });
+            if (!r.ok) {
+                this.deleteError = r.message || 'Could not delete account.';
+                return;
+            }
+            this.deletionDate = (r.data && r.data.deletion_date) || '';
+            this.deletionScheduled = true;
+            this.deleteModal = false;
+            this.deletePassword = '';
+            this.deleteReason = '';
+        } catch (e) {
+            this.deleteError = e.message || 'Could not delete account.';
+        } finally {
+            this.deleting = false;
+        }
+    },
+    finishDeletion() {
+        /* tokens were already revoked server-side by delete-request */
+        api.clearSession();
+        location.href = '/login?deleted=1';
     },
 }));
 

@@ -48,6 +48,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // Bind booleans as string literals on Postgres so queries against
+        // boolean columns survive both native and emulated prepares.
+        \Illuminate\Database\Connection::resolverFor('pgsql', function ($connection, $database, $prefix, $config) {
+            return new \App\Database\PgsqlConnection($connection, $database, $prefix, $config);
+        });
+
         // Debug-only tooling, registered behind explicit flags instead of
         // unconditionally in config/app.php. In production
         // (composer install --no-dev) barryvdh/laravel-debugbar is absent, so

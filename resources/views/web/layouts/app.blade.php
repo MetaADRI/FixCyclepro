@@ -53,10 +53,17 @@
                         <div class="flex items-center gap-3">
                             <div class="brand-bg brand-contrast flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold uppercase"
                                  x-text="(user?.first_name?.[0] || 'U')"></div>
-                            <div class="min-w-0">
+                            <div class="min-w-0 flex-1">
                                 <p class="truncate text-sm font-semibold text-slate-900 dark:text-white"
                                    x-text="user?.first_name || 'Account'"></p>
-                                <a href="/app/profile" class="text-xs text-slate-500 dark:text-slate-400">Profile</a>
+                                <div class="flex items-center justify-between gap-2">
+                                    <a href="/app/profile" class="text-xs text-slate-500 dark:text-slate-400">Profile</a>
+                                    <button type="button" class="inline-flex items-center gap-1 text-xs font-semibold text-danger hover:text-danger"
+                                            @click="logout()">
+                                        <svg class="h-3.5 w-3.5" aria-hidden="true"><use href="#i-logout"/></svg>
+                                        Sign out
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </template>

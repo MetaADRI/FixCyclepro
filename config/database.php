@@ -140,6 +140,18 @@ return [
             'prefix' => '',
             'schema' => 'public',
             'sslmode' => env('DB_SSLMODE') ?: ($neon['sslmode'] ?: 'prefer'),
+            // On some PHP builds (notably Windows + bundled libpq against
+            // Postgres proxies) PDO's native prepare path costs several extra
+            // network round trips per statement. Emulating prepares client-side
+            // restores single-round-trip latency for parameterised queries.
+            // Enable per environment with DB_EMULATE_PREPARES=true.
+            // DB_PERSISTENT=true additionally reuses PDO connections across
+            // requests (dev server / long-lived workers) to skip the TLS
+            // handshake on high-latency links.
+            'options' => [
+                PDO::ATTR_EMULATE_PREPARES => env('DB_EMULATE_PREPARES', false),
+                PDO::ATTR_PERSISTENT => env('DB_PERSISTENT', false),
+            ],
         ],
 
         /*
@@ -158,6 +170,10 @@ return [
             'prefix' => '',
             'schema' => 'public',
             'sslmode' => env('DB_SSLMODE') ?: ($neon['sslmode'] ?: 'require'),
+            'options' => [
+                PDO::ATTR_EMULATE_PREPARES => env('DB_EMULATE_PREPARES', false),
+                PDO::ATTR_PERSISTENT => env('DB_PERSISTENT', false),
+            ],
         ],
 
         'sqlsrv' => [

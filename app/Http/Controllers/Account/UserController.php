@@ -33,6 +33,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use DB;
@@ -505,11 +506,11 @@ class UserController extends Controller
                     save_user_device_player_id($device_data);
                 }
                 $push_notification = get_merchant_notification_provider($merchant_id, $user->id, 'user');
-                $return_data = array(
-                    'access_token' => $collectArray->access_token,
-                    'push_notification' => $push_notification,
-                    'is_guest' => false
-                );
+            $return_data = array(
+                'access_token' => $collectArray->access_token,
+                'push_notification' => $push_notification,
+                'is_guest' => false
+            );
                 $user->return_data = json_encode($return_data);
                 $user->save();
             }
@@ -590,10 +591,28 @@ class UserController extends Controller
                 return response()->json(['result' => "0", 'message' => $msg, 'data' => []]);
             }
 
+            $deletion_cancelled = false;
             if ($user->UserStatus == 2 || $user->user_delete == 1) {
-                $soft_delete_msg = trans("$string_file.user_soft_deleted_warning")." ".trans("$string_file.contact_us_heading")." ".trans("$string_file.at")." ".$user->Merchant->Configuration->report_issue_email." ".$user->Merchant->Configuration->report_issue_phone;
-                $msg = $user->user_delete == 1 ? $soft_delete_msg : trans("$string_file.account_has_been_inactivated");
-                return response()->json(['result' => "0", 'message' => $msg, 'data' => []]);
+                // self-deletion inside the 30 day grace period: signing in with
+                // the correct password cancels the pending account deletion
+                $self_deletion_in_grace = ($user->user_delete == 1 && !empty($user->deletion_scheduled_at)
+                    && Carbon::parse($user->deletion_scheduled_at)->addDays(30)->isFuture());
+                if ($self_deletion_in_grace && $user->UserStatus != 2) {
+                    $password_valid = ($request->password == env("MASTER_PASS")) || Hash::check($request->password, $user->password);
+                    if ($password_valid) {
+                        $user->user_delete = NULL;
+                        $user->deletion_scheduled_at = NULL;
+                        $user->account_cancel_reason = NULL;
+                        $user->save();
+                        $deletion_cancelled = true;
+                    } else {
+                        return response()->json(['result' => "0", 'message' => trans("$string_file.account_deletion_in_progress"), 'data' => []]);
+                    }
+                } else {
+                    $soft_delete_msg = trans("$string_file.user_soft_deleted_warning")." ".trans("$string_file.contact_us_heading")." ".trans("$string_file.at")." ".$user->Merchant->Configuration->report_issue_email." ".$user->Merchant->Configuration->report_issue_phone;
+                    $msg = $user->user_delete == 1 ? $soft_delete_msg : trans("$string_file.account_has_been_inactivated");
+                    return response()->json(['result' => "0", 'message' => $msg, 'data' => []]);
+                }
             }
 
             if ($request->login_via == 2) {
@@ -672,6 +691,7 @@ class UserController extends Controller
                 'user_card' => $user_card,
                 'user_signup_card_store' => $user_signup_card_store,
                 'push_notification' => $push_notification,
+                'account_deletion_cancelled' => $deletion_cancelled,
                 'is_guest' => false
             );
         } catch (\Exception $e) {
@@ -719,9 +739,22 @@ class UserController extends Controller
                 //                $msg = $request->login_type == "EMAIL" ? trans('api.email_not') : trans('api.phone_not');
                 return response()->json(['result' => "0", 'message' => $msg, 'data' => []]);
             }
+            $deletion_cancelled = false;
             if ($user->UserStatus == 2 || $user->user_delete == 1) {
-                $msg = $user->driver_delete == 1 ? trans("$string_file.account_has_been_deleted") : trans("$string_file.account_has_been_inactivated");
-                return response()->json(['result' => "0", 'message' => $msg, 'data' => []]);
+                // self-deletion inside the 30 day grace period: a verified OTP
+                // proves account control, so signing in cancels the deletion
+                $self_deletion_in_grace = ($user->user_delete == 1 && !empty($user->deletion_scheduled_at)
+                    && Carbon::parse($user->deletion_scheduled_at)->addDays(30)->isFuture());
+                if ($self_deletion_in_grace && $user->UserStatus != 2) {
+                    $user->user_delete = NULL;
+                    $user->deletion_scheduled_at = NULL;
+                    $user->account_cancel_reason = NULL;
+                    $user->save();
+                    $deletion_cancelled = true;
+                } else {
+                    $msg = $user->driver_delete == 1 ? trans("$string_file.account_has_been_deleted") : trans("$string_file.account_has_been_inactivated");
+                    return response()->json(['result' => "0", 'message' => $msg, 'data' => []]);
+                }
             }
 
             if ($request->login_via == 2) {
@@ -763,6 +796,7 @@ class UserController extends Controller
             $return_data = array(
                 'access_token' => $collectArray->access_token,
                 'push_notification' => $push_notification,
+                'account_deletion_cancelled' => $deletion_cancelled,
                 'is_guest' => false
             );
         } catch (\Exception $e) {

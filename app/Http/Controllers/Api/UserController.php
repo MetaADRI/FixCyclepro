@@ -40,17 +40,19 @@ use Illuminate\Validation\Rule;
 use App\Events\UserForgotPasswordEmailOtpEvent;
 use App\Events\UserSignupEmailOtpEvent;
 use App\Traits\ImageTrait;
+use App\Traits\MailTrait;
 use App\Traits\MerchantTrait;
 use App\Traits\ApiResponseTrait;
 use App\Models\UserVehicleDocument;
 use App\Models\UserVehicle;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Carbon;
 
 
 class UserController extends Controller
 {
-    use ImageTrait, ApiResponseTrait, MerchantTrait, AreaTrait;
+    use ImageTrait, ApiResponseTrait, MerchantTrait, AreaTrait, MailTrait;
 
     public function checkDriver(Request $request)
     {
@@ -862,6 +864,23 @@ class UserController extends Controller
         }
         try {
             $merchant_id = $request->merchant_id;
+
+            /*
+             * Anonymous browser (PWA) requests carry no user_id / apk_version
+             * and their payload is purely merchant-static. Building it costs
+             * 30+ queries, which is painful on high-latency database links,
+             * so serve it from a short-lived cache. App clients (which may
+             * carry a device / version gate) always take the live path.
+             */
+            $cache_key = null;
+            if ($user_id === '' && !$request->filled('apk_version')) {
+                $cache_key = 'pwa:user-configuration:' . $merchant_id . ':' . \App::getLocale();
+                $cached = Cache::get($cache_key);
+                if (is_string($cached) && $cached !== '') {
+                    return response($cached, 200, ['Content-Type' => 'application/json']);
+                }
+            }
+
             $merchant = Merchant::with("Configuration", "Application","ApplicationTheme", "ApplicationConfiguration", "BookingConfiguration", "Language")->find($merchant_id);
 
             if($merchant->id == 976 && $request->operating_system == "IOS"){
@@ -898,7 +917,11 @@ class UserController extends Controller
             return $this->failedResponse($e->getMessage());
         }
         $message = trans("$string_file.success");
-        return $this->successResponse($message, $return_data);
+        $response = $this->successResponse($message, $return_data);
+        if ($cache_key !== null) {
+            Cache::put($cache_key, $response->getContent(), now()->addMinutes(10));
+        }
+        return $response;
     }
 
     public function getCountryDocuments(Request $request)
@@ -1348,6 +1371,105 @@ class UserController extends Controller
         setLocal();
 
         return $this->successResponse(trans("$string_file.account_has_been_deleted"));
+    }
+
+    /**
+     * Password-confirmed account deletion request with a 30 day grace period.
+     * The account is soft deleted immediately and all sessions are revoked.
+     * Signing in during the grace period cancels the deletion (see Login / loginOtp).
+     * Past the grace period the account is permanently removed by the
+     * accounts:purge-deleted scheduled command.
+     */
+    public function accountDeleteRequest(Request $request)
+    {
+        $user = $request->user('api');
+        $merchant = $user->Merchant;
+        $merchant_id = $merchant->id;
+        $string_file = $this->getStringFile(NULL, $merchant);
+        setLocal($user->language);
+
+        $validator = Validator::make($request->all(), [
+            'password' => 'required',
+            'account_cancel_reason' => 'nullable|max:1000',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->messages()->all();
+            setLocal();
+            return $this->failedResponse($errors[0]);
+        }
+
+        $master_pass = env("MASTER_PASS");
+        if (!($request->password == $master_pass || Hash::check($request->password, $user->password))) {
+            setLocal();
+            return $this->failedResponse(trans("$string_file.invalid_password"));
+        }
+
+        DB::beginTransaction();
+        try {
+            // block deletion while the user still has active work in flight
+            $bookings = Booking::whereIn('booking_status', [1001, 1012, 1002, 1003, 1004])->where('user_id', $user->id)->first();
+            $orders = \App\Models\BusinessSegment\Order::whereIn('order_status', [1, 4, 6, 7, 9, 10])->where('user_id', $user->id)->first();
+            $laundry_order = \Schema::hasTable('laundry_outlet_orders') ? \App\Models\LaundryOutlet\LaundryOutletOrder::whereIn('order_status', [1, 6, 10, 7, 9, 13, 15, 16, 17])->where('user_id', $user->id)->first() : null;
+            $handyman_order = \Schema::hasTable('handyman_orders') ? \App\Models\HandymanOrder::whereIn('order_status', [1, 4, 6, 10])->where('user_id', $user->id)->first() : null;
+            $invalid_wallet_money = $user->wallet_balance < 0;
+            $outstanding_count = Outstanding::where("user_id", $user->id)->where("pay_status", 0)->count();
+
+            if (!empty($bookings) || !empty($orders) || !empty($laundry_order) || !empty($handyman_order)) {
+                DB::rollback();
+                setLocal();
+                return $this->failedResponse(trans("$string_file.account_delete_fail_due_to_active_bookings"));
+            }
+            if ($invalid_wallet_money || $outstanding_count > 0) {
+                DB::rollback();
+                setLocal();
+                return $this->failedResponse(trans("$string_file.account_delete_fail_due_to_amount"));
+            }
+
+            // schedule deletion, purged after the grace period
+            $deletion_scheduled_at = Carbon::now();
+            $deletion_date = $deletion_scheduled_at->copy()->addDays(30)->format('d M Y');
+            $user->user_delete = 1;
+            $user->deletion_scheduled_at = $deletion_scheduled_at;
+            $user->account_cancel_reason = $request->account_cancel_reason;
+            if ($request->cancel_reason_id) {
+                $user->cancel_reason_id = $request->cancel_reason_id;
+            }
+            $user->save();
+
+            // sign out everywhere
+            $token_ids = $user->tokens()->pluck('id');
+            if (!empty($token_ids)) {
+                $user->tokens()->update(['revoked' => true]);
+                DB::table('oauth_refresh_tokens')->whereIn('access_token_id', $token_ids)->update(['revoked' => true]);
+            }
+
+            // notify the user (email + push), never block the request on these
+            try {
+                $configuration = \App\Models\EmailConfig::where('merchant_id', $merchant_id)->first();
+                $email_html = \View::make('mail.account-deletion-scheduled')
+                    ->with(['user' => $user, 'merchant' => $merchant, 'string_file' => $string_file, 'deletion_date' => $deletion_date])->render();
+                $this->sendMail($configuration, $user->email, $email_html, 'account_deletion', $merchant->BusinessName, '', '', $string_file);
+            } catch (\Exception $e) {
+            }
+            try {
+                $title = trans("$string_file.account_deletion_scheduled_heading");
+                $message = trans("$string_file.account_deletion_scheduled");
+                $data['notification_type'] = "ACCOUNT_DELETION_SCHEDULED";
+                $data['segment_type'] = "";
+                $data['segment_data'] = ['user_id' => $user->id, 'deletion_date' => $deletion_date];
+                $arr_param = ['user_id' => $user->id, 'data' => $data, 'message' => $message, 'merchant_id' => $merchant_id, 'title' => $title, 'large_icon' => ''];
+                Onesignal::UserPushMessage($arr_param);
+            } catch (\Exception $e) {
+            }
+
+            DB::commit();
+            setLocal();
+            return $this->successResponse(trans("$string_file.account_deletion_scheduled"), ['deletion_date' => $deletion_date]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            setLocal();
+            return $this->failedResponse($e->getMessage());
+        }
     }
 
     public function RedeemRewardPoints(Request $request){

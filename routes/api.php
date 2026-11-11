@@ -1221,6 +1221,7 @@ Route::any('/yas/createtoken', 'PaymentMethods\Yas\YasController@createtoken')->
         Route::post('/interswitch/payment-confirmation/{check_for}', 'PaymentMethods\Interswitch\InterswitchController@paymentConfirmation');
 
         Route::post('/account-delete', 'Api\UserController@AccountDelete');
+        Route::post('/account/delete-request', 'Api\UserController@accountDeleteRequest');
 
         //TelebirrPay
         // Not in use added in Online Make Payment API

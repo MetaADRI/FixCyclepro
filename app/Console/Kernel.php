@@ -25,8 +25,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        // permanently remove user accounts past their 30 day self-deletion grace period
+        $schedule->command('accounts:purge-deleted')->dailyAt('03:00');
     }
 
     /**

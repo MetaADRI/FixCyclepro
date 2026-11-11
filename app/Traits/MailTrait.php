@@ -80,6 +80,9 @@ trait MailTrait
                 case 'sos':
                     $subject = trans("$string_file.sos_subject");
                     break;
+                case 'account_deletion':
+                    $subject = trans("$string_file.account_deletion_subject");
+                    break;
                 default:
                     $subject = 'Welcome';
             }
