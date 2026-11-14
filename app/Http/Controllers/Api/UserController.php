@@ -21,6 +21,7 @@ use App\Models\Document;
 use App\Models\Driver;
 use App\Models\Onesignal;
 use App\Models\Outstanding;
+use App\Models\PaymentOption;
 use App\Models\SmsConfiguration;
 use App\Models\UserCard;
 use App\Traits\AreaTrait;
@@ -367,6 +368,24 @@ class UserController extends Controller
             }
         }
 
+        /*
+         * Top-ups need a valid payment option. When none is supplied (or the
+         * supplied one no longer exists) we pick the first configured option;
+         * if the merchant has no payment options at all we return a friendly
+         * failure instead of letting the wallet helper crash on a bad FK.
+         */
+        $payment_option_id = $request->payment_option_id;
+        if (!empty($payment_option_id)) {
+            if (empty(PaymentOption::find($payment_option_id))) {
+                return $this->failedResponse(trans("$string_file.payment_option_not_found"));
+            }
+        } else {
+            $payment_option_id = PaymentOption::orderBy('id')->value('id');
+        }
+        if (empty($payment_option_id)) {
+            return $this->failedResponse(trans("$string_file.wallet_topup_unavailable"));
+        }
+
         $paramArray = array(
             'user_id' => $user->id,
             'booking_id' => NULL,
@@ -374,7 +393,7 @@ class UserController extends Controller
             'narration' => 2,
             'platform' => 2,
             'payment_method' => 2,
-            'payment_option_id' => $request->payment_option_id,
+            'payment_option_id' => $payment_option_id,
             'transaction_id' => 2,
         );
         WalletTransaction::UserWalletCredit($paramArray);
@@ -418,25 +437,25 @@ class UserController extends Controller
                     $transaction_value = trans("$string_file.credit");
                     $transaction_name = trans("$string_file.money_added_in_wallet");
                     $value_color = "2ecc71";
-                    $image = view_config_image("static-images/dollar1.png");
+                    $image = "";
                     break;
                 case "2": // Debit
                     $transaction_value = trans("$string_file.debit");
                     $transaction_name = trans("$string_file.deductible_amount");
                     $value_color = "e74c3c";
-                    $image = view_config_image("static-images/dollar.png");
+                    $image = "";
                     break;
                 case "3": // Transfered
                     $transaction_value = trans("$string_file.debit");
                     $transaction_name = trans("$string_file.amount_transferred");
                     $value_color = "e74c3c";
-                    $image = view_config_image("static-images/dollar.png");
+                    $image = "";
                     break;
                 case "4": //Cashback
                     $transaction_value = trans("$string_file.credit");
                     $transaction_name = trans("$string_file.money_added_in_wallet") . '(' . trans("$string_file.cashback") . ')';
                     $value_color = "2ecc71";
-                    $image = view_config_image("static-images/dollar1.png");
+                    $image = "";
                     break;
             }
             $timezone = "";

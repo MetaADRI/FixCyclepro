@@ -591,6 +591,8 @@ return array (
   'string_translation' => 'String Translation',
   'string_file_not_found' => 'File not found for selected locale, please contact to super admin',
   'money_added_in_wallet' => 'Money added in your wallet successfully',
+  'wallet_topup_unavailable' => 'Online wallet top-ups are not available yet. You can still pay for trips by cash.',
+  'payment_option_not_found' => 'That payment method is no longer available. Please choose another one.',
   'signup_done' => 'Signup done successfully',
   'data_found' => 'Data fetched successfully',
   'demo_configuration_not_found' => 'Sorry, demo configuration not found',

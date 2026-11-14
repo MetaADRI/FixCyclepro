@@ -208,7 +208,10 @@ Alpine.data('appShell', () => ({
     ],
     open: false,
     isActive(path) {
-        return location.pathname === path || location.pathname.startsWith('/app');
+        const current = location.pathname.replace(/\/+$/, '') || '/';
+        const target = path.replace(/\/+$/, '') || '/';
+        if (current === target) return true;
+        return target !== '/app' && current.startsWith(target + '/');
     },
 }));
 
@@ -591,6 +594,11 @@ Alpine.data('homeScreen', () => ({
     retry() {
         this.init();
     },
+    async retryLocation() {
+        this.loading = true;
+        await this.locate();
+        await this.loadSegments();
+    },
 }));
 
 /* ---------- booking flow: pickup → vehicle → estimate → pay → confirm ---------- */
@@ -630,9 +638,16 @@ Alpine.data('bookingFlow', () => ({
     previewKey: '',
     previewInfo: '',
     async init() {
-        const seg = segmentStore();
+        let seg = segmentStore();
         const urlSeg = new URLSearchParams(location.search).get('segment');
-        if (urlSeg) seg && saveSegment(seg);
+        if (urlSeg && (!seg || Number(seg.segment_id) !== Number(urlSeg))) {
+            seg = {
+                segment_id: Number(urlSeg),
+                name: (seg && seg.name) || 'Service',
+                slag: (seg && seg.slag) || '',
+            };
+            saveSegment(seg);
+        }
         if (!seg) {
             this.error = 'Please choose a service from the home screen first.';
             return;
@@ -1165,6 +1180,7 @@ Alpine.data('activeBooking', () => ({
 
 Alpine.data('bookingsScreen', () => ({
     segment: null,
+    needsService: false,
     tab: 'ACTIVE',
     items: [],
     loading: true,
@@ -1172,7 +1188,7 @@ Alpine.data('bookingsScreen', () => ({
     async init() {
         this.segment = segmentStore();
         if (!this.segment) {
-            this.error = 'Choose a service first to see bookings.';
+            this.needsService = true;
             this.loading = false;
             return;
         }
@@ -1188,7 +1204,10 @@ Alpine.data('bookingsScreen', () => ({
                 request_type: this.tab,
             });
             if (!r.ok) {
-                this.error = r.message || 'No bookings yet.';
+                // The legacy API reports "no rows" as a failure result
+                // (e.g. "Data not found"). Treat that as an empty list so
+                // the friendly empty state shows instead of a red error.
+                this.items = [];
                 return;
             }
             this.items = (Array.isArray(r.data) ? r.data : []).map((b) => ({
@@ -1258,6 +1277,9 @@ Alpine.data('walletScreen', () => ({
     txLoading: true,
     adding: false,
     error: '',
+    get topupAvailable() {
+        return Array.isArray(this.options) && this.options.length > 0;
+    },
     async init() {
         try {
             await Alpine.store('auth').bootstrap();
@@ -1288,24 +1310,26 @@ Alpine.data('walletScreen', () => ({
         this.txLoading = true;
         this.transactions = [];
         try {
-            const r = await api.post('/api/user/wallet/transaction', { filter: 1 });
-            if (r.ok && Array.isArray(r.data)) {
-                this.transactions = r.data.map((t) => ({
-                    id: t.id,
-                    amount: t.amount !== null && t.amount !== undefined ? t.amount : t.wallet_amount,
+            const r = await api.post('/api/user/wallet/transaction', { filter: 3 });
+            const payload = r.ok && r.data
+                ? (Array.isArray(r.data) ? r.data : r.data.recent_transactoin)
+                : [];
+            const list = Array.isArray(payload) ? payload : [];
+            this.transactions = list.map((t) => {
+                let amount = t.amount !== null && t.amount !== undefined ? t.amount : t.wallet_amount;
+                if (typeof amount === 'string') amount = amount.replace(/,/g, '');
+                return {
+                    amount,
                     label:
+                        t.transaction_name ||
                         t.label_description ||
                         t.description ||
                         t.transaction_description ||
-                        (t.type ? 'Wallet ' + t.type : 'Wallet'),
-                    date:
-                        t.created_at ||
-                        t.date ||
-                        t.transaction_date ||
-                        '',
-                    type: t.type || t.transaction_type || '',
-                }));
-            }
+                        'Wallet',
+                    date: t.date || t.created_at || t.transaction_date || '',
+                    type: String(t.type || t.transaction_type || '').toLowerCase(),
+                };
+            });
         } catch (e) {
             /* keep empty */
         } finally {
@@ -1314,6 +1338,10 @@ Alpine.data('walletScreen', () => ({
     },
     async add() {
         this.error = '';
+        if (!this.topupAvailable) {
+            this.error = 'Online top-ups are not available yet.';
+            return;
+        }
         const amt = Number(this.amount);
         if (!amt || amt <= 0) {
             this.error = 'Enter a valid amount.';
@@ -1514,4 +1542,30 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 }
 if (location.pathname === '/app' || location.pathname.startsWith('/app/')) {
     Alpine.store('theme').load?.();
+}
+
+/* ---------- scroll reveal (landing sections) ---------- */
+function initScrollReveal() {
+    const targets = Array.from(document.querySelectorAll('.reveal'));
+    if (!targets.length) return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced || !('IntersectionObserver' in window)) {
+        targets.forEach((el) => el.classList.add('is-visible'));
+        return;
+    }
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                entry.target.classList.toggle('is-visible', entry.isIntersecting);
+            });
+        },
+        { threshold: 0.16, rootMargin: '0px 0px -6% 0px' }
+    );
+    targets.forEach((el) => observer.observe(el));
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollReveal);
+} else {
+    initScrollReveal();
 }

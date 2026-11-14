@@ -82,10 +82,40 @@
                     <img data-logo="dark" src="{{ asset('images/fixcycle-logo-dark.png') }}" alt="" aria-hidden="true" class="hidden h-9 w-9 object-contain dark:block">
                     <span class="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">{{ config('app.name', 'Fixcycle') }}</span>
                 </a>
-                <button type="button" class="btn-ghost h-10 w-10 !min-h-0 !min-w-0 rounded-xl !p-0" x-data @click="Alpine.store('theme').toggle()" :aria-pressed="Alpine.store('theme').mode === 'dark'" aria-label="Toggle dark mode">
-                    <svg class="h-5 w-5 dark:hidden" aria-hidden="true"><use href="#i-moon"/></svg>
-                    <svg class="hidden h-5 w-5 dark:block" aria-hidden="true"><use href="#i-sun"/></svg>
-                </button>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" class="btn-ghost h-10 w-10 !min-h-0 !min-w-0 rounded-xl !p-0" x-data @click="Alpine.store('theme').toggle()" :aria-pressed="Alpine.store('theme').mode === 'dark'" aria-label="Toggle dark mode">
+                        <svg class="h-5 w-5 dark:hidden" aria-hidden="true"><use href="#i-moon"/></svg>
+                        <svg class="hidden h-5 w-5 dark:block" aria-hidden="true"><use href="#i-sun"/></svg>
+                    </button>
+                    <div x-data="auth" class="relative">
+                        <template x-if="isLoggedIn">
+                            <div x-data="{ menuOpen: false }" class="relative" @keydown.escape.window="menuOpen = false">
+                                <button type="button"
+                                        class="brand-bg brand-contrast flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold uppercase"
+                                        @click="menuOpen = !menuOpen" :aria-expanded="menuOpen" aria-label="Account menu"
+                                        x-text="(user?.first_name?.[0] || 'U')"></button>
+                                <div x-show="menuOpen" x-cloak @click.outside="menuOpen = false"
+                                     class="absolute right-0 z-40 mt-2 w-52 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lifted dark:border-slate-700 dark:bg-slate-900">
+                                    <div class="border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+                                        <p class="truncate text-sm font-bold text-slate-900 dark:text-white" x-text="((user?.first_name || '') + ' ' + (user?.last_name || '')).trim() || 'Account'"></p>
+                                        <p class="truncate text-xs text-slate-500" x-text="user?.email || ''"></p>
+                                    </div>
+                                    <a href="/app/profile" class="flex items-center gap-2.5 px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800">
+                                        <svg class="h-4 w-4 text-slate-400" aria-hidden="true"><use href="#i-profile"/></svg>
+                                        Profile
+                                    </a>
+                                    <button type="button" class="flex w-full items-center gap-2.5 px-4 py-3 text-left text-sm font-semibold text-danger hover:bg-red-50 dark:hover:bg-red-950/40" @click="logout()">
+                                        <svg class="h-4 w-4" aria-hidden="true"><use href="#i-logout"/></svg>
+                                        Sign out
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!isLoggedIn">
+                            <a href="/login" class="btn-primary !min-h-0 h-10 rounded-xl px-4 text-xs">Sign in</a>
+                        </template>
+                    </div>
+                </div>
             </header>
             <main class="flex-1 pb-24 lg:pb-0">
                 {{ $slot }}
